@@ -1,6 +1,10 @@
 ﻿using APSIM.Core;
 using GLib;
 using Models.DCAPST;
+using Models.LeafWise;
+using Models.Interfaces;
+using Models.PMF;
+using Models.PMF.Struct;
 using Moq;
 using NUnit.Framework;
 
@@ -72,6 +76,43 @@ namespace UnitTests.DCaPST
             mock.Verify(cropGen => cropGen.Generate(cropName), Times.Once());
             mock.Verify(cropGen => cropGen.Generate(differentCropName), Times.Once());
             Assert.That(model.CropName, Is.EqualTo(differentCropName));
+        }
+
+        [Test]
+        public void EffectiveLeafWidthUsesLeafWiseForMatchingCrop()
+        {
+            var plant = new Plant { Name = "Sorghum" };
+            var leafWise = new LeafWiseModel { CropName = plant.Name };
+            var culm = new Culm(0) { CulmNo = 0, FinalLeafNo = 17 };
+            leafWise.CalculateIndividualLeafArea(1, culm);
+            leafWise.CalculateIndividualLeafArea(2, culm);
+
+            double result = DCaPSTModelNG.GetEffectiveLeafWidth(0.09, leafWise, plant);
+
+            Assert.That(result, Is.EqualTo(leafWise.AverageLeafWidth));
+        }
+
+        [Test]
+        public void EffectiveLeafWidthKeepsConfiguredWidthWithoutMatchingLeafWiseOutput()
+        {
+            var plant = new Plant { Name = "Sorghum" };
+            var leafWise = new LeafWiseModel { CropName = "Maize" };
+
+            double result = DCaPSTModelNG.GetEffectiveLeafWidth(0.09, leafWise, plant);
+
+            Assert.That(result, Is.EqualTo(0.09));
+        }
+
+        [Test]
+        public void DailyWeatherWindReplacesConstantWindSpeed()
+        {
+            var parameters = new DCaPSTParameters { Windspeed = 1.5 };
+            var weather = new Mock<IWeather>();
+            weather.SetupGet(model => model.Wind).Returns(4.2);
+
+            DCaPSTModelNG.UseDailyWeatherWindSpeed(parameters, weather.Object);
+
+            Assert.That(parameters.Windspeed, Is.EqualTo(4.2));
         }
 
         #endregion

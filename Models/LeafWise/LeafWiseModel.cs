@@ -53,8 +53,17 @@ namespace Models.LeafWise
         [JsonIgnore]
         public double[] LeafLengthsMain => [.. mainCulmLengths.Values];
 
+        /// <summary>
+        /// Average predicted width of all main-culm leaves. This converts the
+        /// individual LeafWise width outputs from millimetres to metres for DCaPST.
+        /// Returns zero until LeafWise has calculated at least one leaf.
+        /// </summary>
+        [JsonIgnore]
+        [Units("m")]
+        public double AverageLeafWidth => mainCulmWidths.Count == 0 ? 0.0 : mainCulmWidths.Values.Average() / 1000.0;
+
         /// <summary>Returns true when this model should replace leaf area for the supplied plant.</summary>
-        public bool AppliesTo(Plant plant)
+        public bool AppliesTo(IPlant plant)
         {
             return Enabled && plant != null && string.Equals(CropName, plant.Name, StringComparison.OrdinalIgnoreCase);
         }

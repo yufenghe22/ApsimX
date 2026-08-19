@@ -21,10 +21,10 @@ namespace Models.DCAPST
         public double AirO2 { get; set; }
 
         /// <summary>
-        /// Local wind speed
+        /// Daily wind speed at the top of the canopy, populated from Weather when DCaPST runs.
         /// </summary>
-        [Description("Local wind speed")]
-        [Units("")]
+        [Description("Daily wind speed at the top of the canopy")]
+        [Units("m/s")]
         public double Windspeed { get; set; }
 
         /// <summary>

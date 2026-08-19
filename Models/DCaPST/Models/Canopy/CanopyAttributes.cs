@@ -100,11 +100,12 @@ namespace Models.DCAPST.Canopy
         public double CalcBoundaryHeatConductance()
         {
             var windspeed = _dcapstParameters.Windspeed;
-            var a = 0.5 * windspeed;
+            // Wind declines as u(L) = u0 exp(-kL). Boundary conductance is
+            // proportional to sqrt(u), hence its extinction coefficient is k/2.
+            var a = 0.5 * _canopyParameters.WindSpeedExtinction;
             var b = 0.01 * Math.Pow(windspeed / _canopyParameters.LeafWidth, 0.5);
-            var c = 1 - Math.Exp(-a * _lai);
 
-            return b * c / a;
+            return IntegrateBoundaryConductance(b, a, _lai);
         }
 
         /// <summary>
@@ -113,11 +114,19 @@ namespace Models.DCAPST.Canopy
         public double CalcSunlitBoundaryHeatConductance()
         {
             var windspeed = _dcapstParameters.Windspeed;
-            var a = 0.5 * windspeed + _absorbed.DirectExtinction;
+            var a = 0.5 * _canopyParameters.WindSpeedExtinction + _absorbed.DirectExtinction;
             var b = 0.01 * Math.Pow(windspeed / _canopyParameters.LeafWidth, 0.5);
-            var c = 1 - Math.Exp(-a * _lai);
 
-            return b * c / a;
+            return IntegrateBoundaryConductance(b, a, _lai);
+        }
+
+        /// <summary>Integrates exponentially attenuated conductance over canopy LAI.</summary>
+        private static double IntegrateBoundaryConductance(double conductanceAtCanopyTop, double extinction, double lai)
+        {
+            if (Math.Abs(extinction) < 1e-12)
+                return conductanceAtCanopyTop * lai;
+
+            return conductanceAtCanopyTop * (1 - Math.Exp(-extinction * lai)) / extinction;
         }
 
         /// <summary>
