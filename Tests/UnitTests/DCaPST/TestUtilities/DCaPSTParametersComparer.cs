@@ -19,7 +19,6 @@ namespace UnitTests.DCaPST
             // Assert
             Assert.That(lhs.Rpar, Is.EqualTo(rhs.Rpar));
             Assert.That(lhs.AirO2, Is.EqualTo(rhs.AirO2));
-            Assert.That(lhs.Windspeed, Is.EqualTo(rhs.Windspeed));
             // Canopy params
             AssertCanopyValuesEqual(lhs.Canopy, rhs.Canopy);
             // Pathway params

@@ -280,9 +280,6 @@ namespace Models.DCAPST
                 return;
             }
 
-            // Use today's above-canopy wind. CanopyAttributes analytically
-            // integrates its exponential attenuation through the canopy.
-            UseDailyWeatherWindSpeed(Parameters, weather);
             UseLeafWiseLeafWidth();
 
             DcapstModel = SetUpModel(
@@ -330,12 +327,6 @@ namespace Models.DCAPST
                 return leafWiseModel.AverageLeafWidth;
 
             return configuredWidth;
-        }
-
-        /// <summary>Updates DCaPST with today's non-negative above-canopy wind speed.</summary>
-        internal static void UseDailyWeatherWindSpeed(DCaPSTParameters parameters, IWeather dailyWeather)
-        {
-            parameters.Windspeed = Math.Max(dailyWeather.Wind, 0.0);
         }
 
         /// <summary>
@@ -396,7 +387,7 @@ namespace Models.DCAPST
 
             var sunlit = new AssimilationArea(includeAc2Pathway, sunlitAc1, sunlitAc2, sunlitAj, assimilation);
             var shaded = new AssimilationArea(includeAc2Pathway, shadedAc1, shadedAc2, shadedAj, assimilation);
-            var canopyAttributes = new CanopyAttributes(dcapstParameters, sunlit, shaded);
+            var canopyAttributes = new CanopyAttributes(dcapstParameters, sunlit, shaded, weather.Wind);
 
             // Model the transpiration
             var waterInteraction = new WaterInteraction(temperature);

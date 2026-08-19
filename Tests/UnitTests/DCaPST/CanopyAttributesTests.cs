@@ -13,9 +13,9 @@ namespace UnitTests.DCaPST
         [Test]
         public void BoundaryConductanceUsesWindExtinctionCoefficient()
         {
+            const double windspeed = 4.0;
             var parameters = new DCaPSTParameters
             {
-                Windspeed = 4.0,
                 Canopy = new CanopyParameters
                 {
                     LeafWidth = 0.1,
@@ -27,10 +27,11 @@ namespace UnitTests.DCaPST
             var canopy = new CanopyAttributes(
                 parameters,
                 Mock.Of<IAssimilationArea>(),
-                Mock.Of<IAssimilationArea>());
+                Mock.Of<IAssimilationArea>(),
+                windspeed);
             canopy.InitialiseDay(lai: 3.0, sln: 1.0);
 
-            double topConductance = 0.01 * Math.Sqrt(parameters.Windspeed / parameters.Canopy.LeafWidth);
+            double topConductance = 0.01 * Math.Sqrt(windspeed / parameters.Canopy.LeafWidth);
             double expected = topConductance * (1 - Math.Exp(-3.0));
 
             Assert.That(canopy.CalcBoundaryHeatConductance(), Is.EqualTo(expected).Within(1e-12));
@@ -39,9 +40,9 @@ namespace UnitTests.DCaPST
         [Test]
         public void ZeroWindExtinctionUsesUnattenuatedLimit()
         {
+            const double windspeed = 4.0;
             var parameters = new DCaPSTParameters
             {
-                Windspeed = 4.0,
                 Canopy = new CanopyParameters
                 {
                     LeafWidth = 0.1,
@@ -53,12 +54,45 @@ namespace UnitTests.DCaPST
             var canopy = new CanopyAttributes(
                 parameters,
                 Mock.Of<IAssimilationArea>(),
-                Mock.Of<IAssimilationArea>());
+                Mock.Of<IAssimilationArea>(),
+                windspeed);
             canopy.InitialiseDay(lai: 3.0, sln: 1.0);
 
-            double expected = 0.01 * Math.Sqrt(parameters.Windspeed / parameters.Canopy.LeafWidth) * 3.0;
+            double expected = 0.01 * Math.Sqrt(windspeed / parameters.Canopy.LeafWidth) * 3.0;
 
             Assert.That(canopy.CalcBoundaryHeatConductance(), Is.EqualTo(expected).Within(1e-12));
+        }
+
+        [Test]
+        public void ZeroWindUsesMinimumCanopyConductance()
+        {
+            var sunlit = new Mock<IAssimilationArea>();
+            sunlit.SetupProperty(area => area.LAI);
+            var shaded = new Mock<IAssimilationArea>();
+            shaded.SetupProperty(area => area.LAI);
+            var parameters = new DCaPSTParameters
+            {
+                Canopy = new CanopyParameters
+                {
+                    LeafWidth = 0.1,
+                    WindSpeedExtinction = 1.5,
+                    SLNRatioTop = 1.3,
+                    MinimumN = 1.0
+                }
+            };
+            var canopy = new CanopyAttributes(parameters, sunlit.Object, shaded.Object, windspeed: 0.0);
+            canopy.InitialiseDay(lai: 3.0, sln: 1.0);
+
+            // Supply a sunlit/shaded partition for the zero-wind fallback.
+            sunlit.Object.LAI = 1.0;
+            shaded.Object.LAI = 2.0;
+
+            double total = canopy.CalcBoundaryHeatConductance();
+            double sun = canopy.CalcSunlitBoundaryHeatConductance();
+
+            Assert.That(total, Is.EqualTo(0.005));
+            Assert.That(sun, Is.EqualTo(0.005 / 3.0).Within(1e-12));
+            Assert.That(total - sun, Is.EqualTo(0.010 / 3.0).Within(1e-12));
         }
     }
 }

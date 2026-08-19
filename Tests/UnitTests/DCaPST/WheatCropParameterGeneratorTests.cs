@@ -15,8 +15,6 @@ namespace UnitTests.DCaPST
             // Assert
             Assert.That(cropParams.Rpar, Is.EqualTo(0.5));
             Assert.That(cropParams.AirO2, Is.EqualTo(210000));
-            Assert.That(cropParams.Windspeed, Is.EqualTo(1.5));
-
             Assert.That(cropParams.Canopy.Type, Is.EqualTo(CanopyType.C3));
             Assert.That(cropParams.Canopy.LeafAngle, Is.EqualTo(60));
             Assert.That(cropParams.Canopy.LeafWidth, Is.EqualTo(0.05));

@@ -103,18 +103,6 @@ namespace UnitTests.DCaPST
             Assert.That(result, Is.EqualTo(0.09));
         }
 
-        [Test]
-        public void DailyWeatherWindReplacesConstantWindSpeed()
-        {
-            var parameters = new DCaPSTParameters { Windspeed = 1.5 };
-            var weather = new Mock<IWeather>();
-            weather.SetupGet(model => model.Wind).Returns(4.2);
-
-            DCaPSTModelNG.UseDailyWeatherWindSpeed(parameters, weather.Object);
-
-            Assert.That(parameters.Windspeed, Is.EqualTo(4.2));
-        }
-
         #endregion
     }
 }

@@ -21,13 +21,6 @@ namespace Models.DCAPST
         public double AirO2 { get; set; }
 
         /// <summary>
-        /// Daily wind speed at the top of the canopy, populated from Weather when DCaPST runs.
-        /// </summary>
-        [Description("Daily wind speed at the top of the canopy")]
-        [Units("m/s")]
-        public double Windspeed { get; set; }
-
-        /// <summary>
         /// Canopy parameters.
         /// </summary>
         [Description("Canopy Parameters")]
@@ -48,7 +41,6 @@ namespace Models.DCAPST
         {
             Rpar = 0.5;
             AirO2 = 210000;
-            Windspeed = 1.5;
             Canopy = new();
             Pathway = new();
         }
