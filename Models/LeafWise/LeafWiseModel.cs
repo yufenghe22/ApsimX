@@ -26,6 +26,8 @@ namespace Models.LeafWise
     {
         private readonly SortedDictionary<int, double> mainCulmWidths = new();
         private readonly SortedDictionary<int, double> mainCulmLengths = new();
+        private int lastFullyExpandedLeaf;
+        private double effectiveLeafWidth;
 
         /// <summary>Structure instance supplied by APSIM.Core.</summary>
         [field: NonSerialized]
@@ -53,14 +55,31 @@ namespace Models.LeafWise
         [JsonIgnore]
         public double[] LeafLengthsMain => [.. mainCulmLengths.Values];
 
-        /// <summary>
-        /// Average predicted width of all main-culm leaves. This converts the
-        /// individual LeafWise width outputs from millimetres to metres for DCaPST.
-        /// Returns zero until LeafWise has calculated at least one leaf.
-        /// </summary>
+        /// <summary>Maximum width reached by fully expanded main-culm leaves.</summary>
+        /// <remarks>
+        /// This is the width supplied to DCaPST. It increases as successively
+        /// wider leaves fully expand and remains at the maximum when later leaves
+        /// are narrower.
+        /// </remarks>
         [JsonIgnore]
         [Units("m")]
-        public double AverageLeafWidth => mainCulmWidths.Count == 0 ? 0.0 : mainCulmWidths.Values.Average() / 1000.0;
+        public double EffectiveLeafWidth => effectiveLeafWidth / 1000.0;
+
+        /// <summary>Updates effective width through the latest fully expanded main-culm leaf.</summary>
+        /// <param name="currentLeafNumber">Cumulative number of fully expanded leaves on the main culm.</param>
+        public void UpdateEffectiveLeafWidth(double currentLeafNumber)
+        {
+            int latestFullyExpandedLeaf = Math.Max((int)Math.Floor(currentLeafNumber), 0);
+
+            for (int leaf = lastFullyExpandedLeaf + 1; leaf <= latestFullyExpandedLeaf; leaf++)
+            {
+                if (!mainCulmWidths.TryGetValue(leaf, out double width))
+                    break;
+
+                effectiveLeafWidth = Math.Max(effectiveLeafWidth, width);
+                lastFullyExpandedLeaf = leaf;
+            }
+        }
 
         /// <summary>Returns true when this model should replace leaf area for the supplied plant.</summary>
         public bool AppliesTo(IPlant plant)
@@ -123,6 +142,8 @@ namespace Models.LeafWise
             {
                 mainCulmWidths.Clear();
                 mainCulmLengths.Clear();
+                lastFullyExpandedLeaf = 0;
+                effectiveLeafWidth = 0.0;
             }
         }
 

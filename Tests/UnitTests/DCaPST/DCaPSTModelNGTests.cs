@@ -86,10 +86,11 @@ namespace UnitTests.DCaPST
             var culm = new Culm(0) { CulmNo = 0, FinalLeafNo = 17 };
             leafWise.CalculateIndividualLeafArea(1, culm);
             leafWise.CalculateIndividualLeafArea(2, culm);
+            leafWise.UpdateEffectiveLeafWidth(2.0);
 
             double result = DCaPSTModelNG.GetEffectiveLeafWidth(0.09, leafWise, plant);
 
-            Assert.That(result, Is.EqualTo(leafWise.AverageLeafWidth));
+            Assert.That(result, Is.EqualTo(leafWise.EffectiveLeafWidth));
         }
 
         [Test]

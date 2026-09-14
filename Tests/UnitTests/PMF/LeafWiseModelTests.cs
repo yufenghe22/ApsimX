@@ -1,6 +1,7 @@
 using Models.LeafWise;
 using Models.PMF.Struct;
 using NUnit.Framework;
+using System.Linq;
 
 namespace UnitTests.PMF
 {
@@ -22,21 +23,29 @@ namespace UnitTests.PMF
             Assert.That(area, Is.EqualTo(length * width * 0.71).Within(1e-9));
             Assert.That(model.LeafLengthsMain, Is.EqualTo(new[] { length }));
             Assert.That(model.LeafWidthsMain, Is.EqualTo(new[] { width }));
-            Assert.That(model.AverageLeafWidth, Is.EqualTo(width / 1000).Within(1e-12));
+            Assert.That(model.EffectiveLeafWidth, Is.Zero);
         }
 
         [Test]
-        public void ReportsAverageLeafWidthInMetresForDCaPST()
+        public void EffectiveWidthTracksMaximumFullyExpandedLeafWidth()
         {
             var model = new LeafWiseModel();
             var culm = new Culm(0) { CulmNo = 0, FinalLeafNo = 17 };
 
-            double firstWidth = model.CalculateLeafDimension(LeafWiseModel.LeafDimension.Width, 1, 17);
-            double secondWidth = model.CalculateLeafDimension(LeafWiseModel.LeafDimension.Width, 2, 17);
-            model.CalculateIndividualLeafArea(1, culm);
-            model.CalculateIndividualLeafArea(2, culm);
+            for (int leaf = 1; leaf <= 17; leaf++)
+                model.CalculateIndividualLeafArea(leaf, culm);
 
-            Assert.That(model.AverageLeafWidth, Is.EqualTo((firstWidth + secondWidth) / 2 / 1000).Within(1e-12));
+            model.UpdateEffectiveLeafWidth(10.9);
+            double expectedAtLeaf10 = model.LeafWidthsMain.Take(10).Max() / 1000.0;
+            Assert.That(model.EffectiveLeafWidth, Is.EqualTo(expectedAtLeaf10).Within(1e-12));
+
+            model.UpdateEffectiveLeafWidth(12.1);
+            double maximumWidth = model.EffectiveLeafWidth;
+
+            model.UpdateEffectiveLeafWidth(17.0);
+
+            Assert.That(model.LeafWidthsMain[16], Is.LessThan(maximumWidth * 1000.0));
+            Assert.That(model.EffectiveLeafWidth, Is.EqualTo(maximumWidth));
         }
 
         [Test]

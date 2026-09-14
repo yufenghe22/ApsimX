@@ -102,6 +102,9 @@ namespace Models.PMF
                 double leafNoEffective = Math.Min(culm.CurrentLeafNo + leafNoCorrection.Value(), culm.FinalLeafNo);
                 var tmpArea = CalculateIndividualLeafArea(leafNoEffective, culm);
 
+                if (culm.CulmNo == 0 && leafWise?.AppliesTo(plant) == true)
+                    leafWise.UpdateEffectiveLeafWidth(culm.CurrentLeafNo);
+
                 culm.LeafArea = tmpArea.ConvertSqM2SqMM() * sowingDensity * culm.dltLeafNo;
                 culm.DltLAI = culm.LeafArea * culm.Proportion;
 

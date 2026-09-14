@@ -312,7 +312,7 @@ namespace Models.DCAPST
         }
 
         /// <summary>
-        /// Use LeafWise's canopy-average width when both optional models target
+        /// Use LeafWise's effective width when both optional models target
         /// the same crop. DCaPST's configured fixed width remains the fallback.
         /// </summary>
         private void UseLeafWiseLeafWidth()
@@ -323,8 +323,8 @@ namespace Models.DCAPST
         /// <summary>Gets the LeafWise width when available, otherwise the configured DCaPST width.</summary>
         internal static double GetEffectiveLeafWidth(double configuredWidth, LeafWiseModel leafWiseModel, IPlant targetPlant)
         {
-            if (leafWiseModel?.AppliesTo(targetPlant) == true && leafWiseModel.AverageLeafWidth > 0.0)
-                return leafWiseModel.AverageLeafWidth;
+            if (leafWiseModel?.AppliesTo(targetPlant) == true && leafWiseModel.EffectiveLeafWidth > 0.0)
+                return leafWiseModel.EffectiveLeafWidth;
 
             return configuredWidth;
         }
