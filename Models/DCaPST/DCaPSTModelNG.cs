@@ -107,7 +107,7 @@ namespace Models.DCAPST
         /// <summary>
         ///
         /// </summary>
-        private bool includeAc2Pathway = true;
+        private bool includeAc2Pathway = false;
 
         /// <summary>
         /// The crop against which DCaPST will be run.
