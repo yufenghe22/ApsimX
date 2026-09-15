@@ -101,7 +101,8 @@ namespace Models.DCAPST
             Gbs = Pathway.BundleSheathConductance * lai;
             Vpr = Pathway.PEPRegeneration * lai;
 
-            MesophyllCO2 = ambientCO2 * Pathway.IntercellularToAirCO2Ratio;
+            IntercellularCO2 = ambientCO2 * Pathway.IntercellularToBoundaryLayerCO2Ratio;
+            MesophyllCO2 = IntercellularCO2;
             ChloroplasticCO2 = 1000;
             ChloroplasticO2 = 210000;
         }

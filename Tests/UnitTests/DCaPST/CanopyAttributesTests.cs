@@ -94,5 +94,34 @@ namespace UnitTests.DCaPST
             Assert.That(sun, Is.EqualTo(0.005 / 3.0).Within(1e-12));
             Assert.That(total - sun, Is.EqualTo(0.010 / 3.0).Within(1e-12));
         }
+
+        [Test]
+        public void LayerBoundaryConductancesSumToWholeCanopyConductance()
+        {
+            const double windspeed = 4.0;
+            var parameters = new DCaPSTParameters
+            {
+                Canopy = new CanopyParameters
+                {
+                    LeafWidth = 0.1,
+                    WindSpeedExtinction = 2.0,
+                    SLNRatioTop = 1.3,
+                    MinimumN = 1.0
+                }
+            };
+            double layered = 0;
+            for (int layer = 1; layer <= 3; layer++)
+            {
+                var canopy = new CanopyAttributes(parameters, Mock.Of<IAssimilationArea>(),
+                                                  Mock.Of<IAssimilationArea>(), windspeed, layer, 3);
+                canopy.InitialiseDay(3.0, 1.0);
+                layered += canopy.CalcBoundaryHeatConductance();
+            }
+            var whole = new CanopyAttributes(parameters, Mock.Of<IAssimilationArea>(),
+                                             Mock.Of<IAssimilationArea>(), windspeed);
+            whole.InitialiseDay(3.0, 1.0);
+
+            Assert.That(layered, Is.EqualTo(whole.CalcBoundaryHeatConductance()).Within(1e-12));
+        }
     }
 }

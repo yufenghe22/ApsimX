@@ -103,9 +103,9 @@ namespace Models.DCAPST
         public double MinimumN { get; set; }
 
         /// <summary>
-        /// Ratio of the average canopy specific leaf nitrogen (SLN) to the SLN at the top of canopy (g N m^-2 leaf)
+        /// Ratio of specific leaf nitrogen (SLN) at the top of the canopy to average canopy SLN (g N m^-2 leaf)
         /// </summary>
-        [Description("Ratio of average SLN to canopy top SLN")]
+        [Description("Ratio of canopy top SLN to average SLN")]
         [Units("")]
         public double SLNRatioTop { get; set; }
     }

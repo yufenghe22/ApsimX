@@ -107,7 +107,7 @@ namespace Models.DCAPST
         /// <summary>
         ///
         /// </summary>
-        private bool includeAc2Pathway = false;
+        private bool includeAc2Pathway = true;
 
         /// <summary>
         /// The crop against which DCaPST will be run.
@@ -179,6 +179,15 @@ namespace Models.DCAPST
         /// Excess water reduction fraction
         /// </summary>
         public double Reduction { get; set; } = 0;
+
+        /// <summary>Selects whether the canopy is represented by one or three physical layers.</summary>
+        [Description("Canopy layer model")]
+        [Display(Type = DisplayType.DropDown, Values = nameof(GetCanopyLayerModels))]
+        public string CanopyLayerModel { get; set; } = "Single-layer model";
+
+        /// <summary>Number of physical layers used to integrate the canopy.</summary>
+        [JsonIgnore]
+        internal int NumberOfCanopyLayers => CanopyLayerModel == "Multi-layer model" ? 3 : 1;
 
         /// <summary>
         /// Adjusts the AC (Rubisco Limited Photosynthesis) curve by modifying photosynthetic AC variables.
@@ -289,7 +298,8 @@ namespace Models.DCAPST
                 weather,
                 Parameters.Rpar,
                 Biolimit,
-                Reduction
+                Reduction,
+                NumberOfCanopyLayers
             );
 
             double sln = GetSln();
@@ -339,7 +349,8 @@ namespace Models.DCAPST
             IWeather weather,
             double rpar,
             double biolimit,
-            double reduction
+            double reduction,
+            int canopyLayers
         )
         {
             // Model the solar geometry
@@ -368,14 +379,8 @@ namespace Models.DCAPST
             var canopyParameters = dcapstParameters.Canopy;
             var pathwayParameters = dcapstParameters.Pathway;
 
-            // Model the pathways
-            var sunlitAc1 = new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2);
-            var sunlitAc2 = new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2);
-            var sunlitAj = new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2);
-
-            var shadedAc1 = new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2);
-            var shadedAc2 = new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2);
-            var shadedAj = new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2);
+            if (canopyLayers < 1)
+                throw new ArgumentOutOfRangeException(nameof(canopyLayers), "Canopy layer count must be positive.");
 
             IAssimilation assimilation = canopyParameters.Type switch
             {
@@ -385,9 +390,24 @@ namespace Models.DCAPST
                 _ => throw new ArgumentException($"Unsupported canopy type: {canopyParameters.Type}"),
             };
 
-            var sunlit = new AssimilationArea(includeAc2Pathway, sunlitAc1, sunlitAc2, sunlitAj, assimilation);
-            var shaded = new AssimilationArea(includeAc2Pathway, shadedAc1, shadedAc2, shadedAj, assimilation);
-            var canopyAttributes = new CanopyAttributes(dcapstParameters, sunlit, shaded, weather.Wind);
+            var canopyAttributes = new List<ICanopyAttributes>();
+            for (int layer = 1; layer <= canopyLayers; layer++)
+            {
+                var sunlit = new AssimilationArea(
+                    includeAc2Pathway,
+                    new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2),
+                    new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2),
+                    new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2),
+                    assimilation);
+                var shaded = new AssimilationArea(
+                    includeAc2Pathway,
+                    new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2),
+                    new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2),
+                    new AssimilationPathway(canopyParameters, pathwayParameters, ambientCO2),
+                    assimilation);
+                canopyAttributes.Add(new CanopyAttributes(
+                    dcapstParameters, sunlit, shaded, weather.Wind, layer, canopyLayers));
+            }
 
             // Model the transpiration
             var waterInteraction = new WaterInteraction(temperature);
@@ -583,9 +603,13 @@ namespace Models.DCAPST
             throw new InvalidOperationException($"Unable to calculate SLN from leaf type {leaf.GetType()}");
         }
 
-        /// <summary>
-        /// Get the names of all plants in scope.
-        /// </summary>
+        /// <summary>Gets the canopy layer models available in the user interface.</summary>
+        private IEnumerable<string> GetCanopyLayerModels()
+        {
+            return new[] { "Single-layer model", "Multi-layer model" };
+        }
+
+        /// <summary>Gets the names of all plants in scope.</summary>
         private IEnumerable<string> GetPlantNames()
         {
             var plants = Structure.FindAll<IPlant>()

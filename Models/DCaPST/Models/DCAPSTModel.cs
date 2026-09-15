@@ -30,7 +30,7 @@ namespace Models.DCAPST
         /// <summary>
         /// The canopy undergoing photosynthesis
         /// </summary>
-        private ICanopyAttributes Canopy { get; set; }
+        private IReadOnlyList<ICanopyAttributes> Canopies { get; set; }
 
         /// <summary>
         /// The pathway parameters
@@ -149,7 +149,7 @@ namespace Models.DCAPST
             Radiation = default;
             Temperature = default;
             this.pathway = default;
-            Canopy = default;
+            Canopies = Array.Empty<ICanopyAttributes>();
             transpiration = default;
         }
 
@@ -175,7 +175,22 @@ namespace Models.DCAPST
             Radiation = radiation;
             Temperature = temperature;
             this.pathway = pathway;
-            Canopy = canopy;
+            Canopies = new[] { canopy };
+            transpiration = trans;
+        }
+
+        /// <summary>Creates a photosynthesis model with one object per physical canopy layer.</summary>
+        public DCAPSTModel(ISolarGeometry solar, ISolarRadiation radiation, ITemperature temperature,
+                           PathwayParameters pathway, IReadOnlyList<ICanopyAttributes> canopies,
+                           Transpiration trans)
+        {
+            Solar = solar;
+            Radiation = radiation;
+            Temperature = temperature;
+            this.pathway = pathway;
+            Canopies = canopies ?? throw new ArgumentNullException(nameof(canopies));
+            if (Canopies.Count == 0)
+                throw new ArgumentException("At least one canopy layer is required.", nameof(canopies));
             transpiration = trans;
         }
 
@@ -198,7 +213,8 @@ namespace Models.DCAPST
                 .ToArray();
 
             Solar.Initialise();
-            Canopy.InitialiseDay(lai, sln);
+            foreach (ICanopyAttributes canopy in Canopies)
+                canopy.InitialiseDay(lai, sln);
 
             // Unlimited potential calculations
             // Note: In the potential case, we assume unlimited water and therefore supply = demand
@@ -272,15 +288,6 @@ namespace Models.DCAPST
         }
 
         /// <summary>
-        /// Calculates the ratio of A to A + B
-        /// </summary>
-        private static double RatioFunction(double A, double B)
-        {
-            var total = A + B;
-            return A / total;
-        }
-
-        /// <summary>
         /// Reduces the value of any excess water past the limit by a given percentage
         /// </summary>
         /// <param name="water">The total water</param>
@@ -308,7 +315,8 @@ namespace Models.DCAPST
             Temperature.UpdateAirTemperature(intervalValues.Time);
             Radiation.UpdateRadiationValues(intervalValues.Time);
             var sunAngle = Solar.SunAngle(intervalValues.Time);
-            Canopy.DoSolarAdjustment(sunAngle);
+            foreach (ICanopyAttributes canopy in Canopies)
+                canopy.DoSolarAdjustment(sunAngle);
 
             if (IsSensible()) return true;
 
@@ -348,7 +356,7 @@ namespace Models.DCAPST
             {
                 if (!TryInitiliase(interval)) continue;
 
-                InterceptedRadiation += Radiation.Total * Canopy.GetInterceptedRadiation() * SECONDS_IN_HOUR;
+                InterceptedRadiation += Radiation.Total * Canopies[Canopies.Count - 1].GetInterceptedRadiation() * SECONDS_IN_HOUR;
 
                 DoTimestepUpdate(interval);
             }
@@ -362,9 +370,7 @@ namespace Models.DCAPST
         /// </summary>
         private double CalculateLimited(IEnumerable<double> demands)
         {
-            var ratios = Intervals.Select(i => RatioFunction(i.Sunlit.Water, i.Shaded.Water));
-            double[] sunlitDemand = demands.Zip(ratios, (d, ratio) => d * ratio).ToArray();
-            double[] shadedDemand = demands.Zip(ratios, (d, ratio) => d * (1 - ratio)).ToArray();
+            double[] limitedDemands = demands.ToArray();
 
             for (int i = 0; i < Intervals.Length; i++)
             {
@@ -372,9 +378,7 @@ namespace Models.DCAPST
 
                 if (!TryInitiliase(interval)) continue;
 
-                double total = sunlitDemand[i] + shadedDemand[i];
-                transpiration.MaxRate = total;
-                DoTimestepUpdate(interval, sunlitDemand[i] / total, shadedDemand[i] / total);
+                DoTimestepUpdate(interval, limitedDemands[i]);
             }
 
             return Intervals.Select(i => i.Sunlit.A + i.Shaded.A).Sum();
@@ -420,19 +424,8 @@ namespace Models.DCAPST
                     if (!TryInitiliase(interval))
                         continue; // Skip if initialization fails
 
-                    transpiration.MaxRate = intervalWaterSupply;
-
-                    double intervalSunlitDemand = interval.Sunlit.Water;
-                    double intervalShadedDemand = interval.Shaded.Water;
-                    double intervalTotalDemand = intervalSunlitDemand + intervalShadedDemand;
-
-                    if (intervalTotalDemand > 0)
-                    {
-                        double intervalSunFraction = intervalSunlitDemand / intervalTotalDemand;
-                        double intervalShadeFraction = intervalShadedDemand / intervalTotalDemand;
-
-                        DoTimestepUpdate(interval, intervalSunFraction, intervalShadeFraction);
-                    }
+                    if (intervalWaterDemand > 0)
+                        DoTimestepUpdate(interval, intervalWaterSupply);
                 }
 
                 // Accumulate total biomass
@@ -446,25 +439,80 @@ namespace Models.DCAPST
         /// <summary>
         /// Updates the model to a new timestep
         /// </summary>
-        private void DoTimestepUpdate(IntervalValues interval, double sunFraction = 0, double shadeFraction = 0)
+        private void DoTimestepUpdate(IntervalValues interval, double? waterSupply = null)
         {
-            Canopy.DoTimestepAdjustment(Radiation);
-
-            interval.SunlitLAI = Canopy.Sunlit.LAI;
-            interval.ShadedLAI = Canopy.Shaded.LAI;
-
-            var totalHeat = Canopy.CalcBoundaryHeatConductance();
-            var sunlitHeat = Canopy.CalcSunlitBoundaryHeatConductance();
-
-            var shadedHeat = (totalHeat == sunlitHeat) ? double.Epsilon : totalHeat - sunlitHeat;
-
+            CanopyLayerValues[] potentialLayers = interval.Layers;
+            double potentialDemand = potentialLayers?.Sum(layer => layer.Sunlit.Water + layer.Shaded.Water) ?? 0;
+            var layerValues = new CanopyLayerValues[Canopies.Count];
             interval.AirTemperature = Temperature.AirTemperature;
 
-            PerformPhotosynthesis(Canopy.Sunlit, sunlitHeat, sunFraction);
-            interval.Sunlit = Canopy.Sunlit.GetAreaValues();
+            for (int index = 0; index < Canopies.Count; index++)
+            {
+                ICanopyAttributes canopy = Canopies[index];
+                canopy.DoTimestepAdjustment(Radiation);
+                double totalHeat = canopy.CalcBoundaryHeatConductance();
+                double sunlitHeat = canopy.CalcSunlitBoundaryHeatConductance();
+                double shadedHeat = Math.Max(double.Epsilon, totalHeat - sunlitHeat);
+                double sunFraction = waterSupply.HasValue && potentialDemand > 0
+                    ? potentialLayers[index].Sunlit.Water / potentialDemand
+                    : 0;
+                double shadeFraction = waterSupply.HasValue && potentialDemand > 0
+                    ? potentialLayers[index].Shaded.Water / potentialDemand
+                    : 0;
 
-            PerformPhotosynthesis(Canopy.Shaded, shadedHeat, shadeFraction);
-            interval.Shaded = Canopy.Shaded.GetAreaValues();
+                if (waterSupply.HasValue)
+                    transpiration.MaxRate = waterSupply.Value;
+                PerformPhotosynthesis(canopy.Sunlit, sunlitHeat, sunFraction);
+                PerformPhotosynthesis(canopy.Shaded, shadedHeat, shadeFraction);
+                layerValues[index] = new CanopyLayerValues
+                {
+                    SunlitLAI = canopy.Sunlit.LAI,
+                    ShadedLAI = canopy.Shaded.LAI,
+                    Sunlit = canopy.Sunlit.GetAreaValues(),
+                    Shaded = canopy.Shaded.GetAreaValues()
+                };
+            }
+
+            interval.Layers = layerValues;
+            interval.SunlitLAI = layerValues.Sum(layer => layer.SunlitLAI);
+            interval.ShadedLAI = layerValues.Sum(layer => layer.ShadedLAI);
+            interval.Sunlit = AggregateArea(layerValues, true, interval.SunlitLAI);
+            interval.Shaded = AggregateArea(layerValues, false, interval.ShadedLAI);
+        }
+
+        private static AreaValues AggregateArea(IEnumerable<CanopyLayerValues> layers, bool sunlit, double totalLai)
+        {
+            CanopyLayerValues[] values = layers.ToArray();
+            AreaValues[] areas = values.Select(layer => sunlit ? layer.Sunlit : layer.Shaded).ToArray();
+            double[] lais = values.Select(layer => sunlit ? layer.SunlitLAI : layer.ShadedLAI).ToArray();
+            return new AreaValues
+            {
+                A = areas.Sum(area => area.A),
+                Water = areas.Sum(area => area.Water),
+                Temperature = WeightedMean(areas.Select(area => area.Temperature).ToArray(), lais, totalLai),
+                VPD = WeightedMean(areas.Select(area => area.VPD).ToArray(), lais, totalLai),
+                Ac1 = AggregatePath(areas.Select(area => area.Ac1).ToArray(), lais, totalLai),
+                Ac2 = AggregatePath(areas.Select(area => area.Ac2).ToArray(), lais, totalLai),
+                Aj = AggregatePath(areas.Select(area => area.Aj).ToArray(), lais, totalLai)
+            };
+        }
+
+        private static PathValues AggregatePath(PathValues[] paths, double[] lais, double totalLai)
+        {
+            return new PathValues
+            {
+                Assimilation = paths.Sum(path => path.Assimilation),
+                Water = paths.Sum(path => path.Water),
+                Temperature = WeightedMean(paths.Select(path => path.Temperature).ToArray(), lais, totalLai),
+                VPD = WeightedMean(paths.Select(path => path.VPD).ToArray(), lais, totalLai)
+            };
+        }
+
+        private static double WeightedMean(double[] values, double[] weights, double totalWeight)
+        {
+            if (totalWeight <= 0)
+                return 0;
+            return values.Select((value, index) => value * weights[index]).Sum() / totalWeight;
         }
 
         /// <summary>
