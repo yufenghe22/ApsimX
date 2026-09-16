@@ -1,5 +1,6 @@
 using Models.Core;
 using System;
+using System.Linq;
 
 namespace Models.DCAPST
 {
@@ -14,6 +15,7 @@ namespace Models.DCAPST
         /// </summary>
         public DCaPSTIntervalOutput()
         {
+            Layers = Array.Empty<DCaPSTLayerOutput>();
         }
 
         /// <summary>Creates an output from a calculated DCaPST interval.</summary>
@@ -43,6 +45,25 @@ namespace Models.DCAPST
             ShadedAc2 = interval.Shaded.Ac2.Assimilation;
             ShadedAj = interval.Shaded.Aj.Assimilation;
 
+            Layers = interval.Layers?
+                .Select((values, index) => new DCaPSTLayerOutput
+                {
+                    Layer = index + 1,
+                    SunlitLAI = values.SunlitLAI,
+                    SunlitTemperature = values.Sunlit.Temperature,
+                    SunlitAssimilation = values.Sunlit.A,
+                    SunlitAc1 = values.Sunlit.Ac1.Assimilation,
+                    SunlitAc2 = values.Sunlit.Ac2.Assimilation,
+                    SunlitAj = values.Sunlit.Aj.Assimilation,
+                    ShadedLAI = values.ShadedLAI,
+                    ShadedTemperature = values.Shaded.Temperature,
+                    ShadedAssimilation = values.Shaded.A,
+                    ShadedAc1 = values.Shaded.Ac1.Assimilation,
+                    ShadedAc2 = values.Shaded.Ac2.Assimilation,
+                    ShadedAj = values.Shaded.Aj.Assimilation
+                })
+                .ToArray() ?? Array.Empty<DCaPSTLayerOutput>();
+
             double totalLAI = SunlitLAI + ShadedLAI;
             CanopyTemperature = LAIWeightedMean(SunlitTemperature, SunlitLAI, ShadedTemperature, ShadedLAI, totalLAI);
             CanopyVPD = LAIWeightedMean(SunlitVPD, SunlitLAI, ShadedVPD, ShadedLAI, totalLAI);
@@ -58,6 +79,9 @@ namespace Models.DCAPST
         /// <summary>Air temperature during the interval.</summary>
         [Units("°C")]
         public double AirTemperature { get; private set; }
+
+        /// <summary>Values for each physical canopy layer, ordered from top to bottom.</summary>
+        public DCaPSTLayerOutput[] Layers { get; private set; }
 
         /// <summary>Leaf area index of the sunlit canopy.</summary>
         [Units("m^2/m^2")]

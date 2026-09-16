@@ -209,7 +209,13 @@ namespace Models.DCAPST
             if (steps % 1 == 0) steps++;
 
             Intervals = Enumerable.Range(0, (int)Math.Ceiling(steps))
-                .Select(i => new IntervalValues() { Time = start + i * timestep })
+                .Select(i => new IntervalValues
+                {
+                    Time = start + i * timestep,
+                    Layers = Enumerable.Range(0, Canopies.Count)
+                        .Select(_ => new CanopyLayerValues())
+                        .ToArray()
+                })
                 .ToArray();
 
             Solar.Initialise();

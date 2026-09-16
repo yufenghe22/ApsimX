@@ -30,17 +30,20 @@ namespace UnitTests.DCaPST
 
             var outputs = new List<DCaPSTIntervalOutput>();
             var locatedHours = new List<object>();
+            var locatedLayerTemperatures = new List<object>();
             model.IntervalStep += (_, output) =>
             {
                 Assert.That(model.CurrentInterval, Is.SameAs(output));
                 outputs.Add(output);
                 locatedHours.Add(modelNode.Get("[DCaPST].CurrentInterval.Hour", relativeTo: model));
+                locatedLayerTemperatures.Add(modelNode.Get("[DCaPST].CurrentInterval.Layers[1].SunlitTemperature", relativeTo: model));
             };
 
             Utilities.CallMethod(model, "PublishIntervalOutputs", Array.Empty<object>());
 
             Assert.That(outputs, Has.Count.EqualTo(2));
             Assert.That(locatedHours, Is.EqualTo(new object[] { 6.0, 7.0 }));
+            Assert.That(locatedLayerTemperatures, Is.EqualTo(new object[] { 23.0, 123.0 }));
             Assert.That(model.CurrentInterval, Is.Null);
             Assert.That(modelNode.Get("[DCaPST].CurrentInterval.Hour", relativeTo: model), Is.Null);
             Assert.Multiple(() =>
@@ -66,6 +69,21 @@ namespace UnitTests.DCaPST
                 Assert.That(outputs[0].ShadedAc1, Is.EqualTo(14));
                 Assert.That(outputs[0].ShadedAc2, Is.EqualTo(15));
                 Assert.That(outputs[0].ShadedAj, Is.EqualTo(16));
+                Assert.That(outputs[0].Layers, Has.Length.EqualTo(2));
+                Assert.That(outputs[0].Layers[0].Layer, Is.EqualTo(1));
+                Assert.That(outputs[0].Layers[0].SunlitLAI, Is.EqualTo(0.25));
+                Assert.That(outputs[0].Layers[0].SunlitTemperature, Is.EqualTo(23));
+                Assert.That(outputs[0].Layers[0].SunlitAssimilation, Is.EqualTo(21));
+                Assert.That(outputs[0].Layers[0].SunlitAc1, Is.EqualTo(24));
+                Assert.That(outputs[0].Layers[0].SunlitAc2, Is.EqualTo(25));
+                Assert.That(outputs[0].Layers[0].SunlitAj, Is.EqualTo(26));
+                Assert.That(outputs[0].Layers[0].ShadedLAI, Is.EqualTo(0.75));
+                Assert.That(outputs[0].Layers[0].ShadedTemperature, Is.EqualTo(33));
+                Assert.That(outputs[0].Layers[0].ShadedAssimilation, Is.EqualTo(31));
+                Assert.That(outputs[0].Layers[0].ShadedAc1, Is.EqualTo(34));
+                Assert.That(outputs[0].Layers[0].ShadedAc2, Is.EqualTo(35));
+                Assert.That(outputs[0].Layers[0].ShadedAj, Is.EqualTo(36));
+                Assert.That(outputs[0].Layers[1].Layer, Is.EqualTo(2));
                 Assert.That(outputs[1].IntervalDateTime, Is.EqualTo(today.AddHours(7)));
                 Assert.That(outputs[1].Hour, Is.EqualTo(7));
                 Assert.That(outputs[1].SunlitAssimilation, Is.EqualTo(101));
@@ -82,6 +100,17 @@ namespace UnitTests.DCaPST
             Utilities.CallMethod(model, "PublishIntervalOutputs", Array.Empty<object>());
 
             Assert.That(eventCount, Is.Zero);
+        }
+
+        [Test]
+        public void IntervalOutputHandlesMissingLayerValues()
+        {
+            IntervalValues interval = CreateInterval(6, 20, 1);
+            interval.Layers = null;
+
+            var output = new DCaPSTIntervalOutput(new DateTime(2026, 7, 17), interval);
+
+            Assert.That(output.Layers, Is.Empty);
         }
 
         [Test]
@@ -112,6 +141,22 @@ namespace UnitTests.DCaPST
                 AirTemperature = airTemperature,
                 SunlitLAI = 1,
                 ShadedLAI = 3,
+                Sunlit = CreateArea(value),
+                Shaded = CreateArea(value + 10),
+                Layers = new[]
+                {
+                    CreateLayer(value + 20),
+                    CreateLayer(value + 40)
+                }
+            };
+        }
+
+        private static CanopyLayerValues CreateLayer(double value)
+        {
+            return new CanopyLayerValues
+            {
+                SunlitLAI = 0.25,
+                ShadedLAI = 0.75,
                 Sunlit = CreateArea(value),
                 Shaded = CreateArea(value + 10)
             };

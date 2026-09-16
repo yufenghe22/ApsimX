@@ -37,7 +37,32 @@ namespace UnitTests.DCaPST
             });
         }
 
-        private static DCAPSTModel CreateModel(int layerCount)
+        [TestCase(1, 6.259191085304, 1.385800969655, 13.1946572439331, 0.167877103310931)]
+        [TestCase(3, 5.993056288031, 1.346770649759, 12.5385109206498, 0.162537137332654)]
+        public void OneVsThreeLayerExampleMatchesRPackage(int layerCount,
+            double expectedPotentialBiomass, double expectedWaterDemand,
+            double expectedNoonAssimilation, double expectedNoonWater)
+        {
+            DCAPSTModel model = CreateModel(layerCount, windSpeed: 0.5);
+
+            model.DailyRun(1.0, 0.914);
+            model.CalculateBiomass(2.2, 0.25);
+            IntervalValues noon = model.Intervals[6];
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(model.PotentialBiomass,
+                    Is.EqualTo(expectedPotentialBiomass).Within(expectedPotentialBiomass * 5e-4));
+                Assert.That(model.WaterDemanded,
+                    Is.EqualTo(expectedWaterDemand).Within(expectedWaterDemand * 5e-4));
+                Assert.That(noon.Sunlit.A + noon.Shaded.A,
+                    Is.EqualTo(expectedNoonAssimilation).Within(expectedNoonAssimilation * 1e-3));
+                Assert.That(noon.Sunlit.Water + noon.Shaded.Water,
+                    Is.EqualTo(expectedNoonWater).Within(expectedNoonWater * 1e-3));
+            });
+        }
+
+        private static DCAPSTModel CreateModel(int layerCount, double windSpeed = 3)
         {
             DCaPSTParameters parameters = SorghumCropParameterGenerator.Generate();
             var solar = new SolarGeometry
@@ -65,7 +90,7 @@ namespace UnitTests.DCaPST
                     new AssimilationPathway(parameters.Canopy, parameters.Pathway, 363),
                     new AssimilationPathway(parameters.Canopy, parameters.Pathway, 363),
                     new AssimilationPathway(parameters.Canopy, parameters.Pathway, 363), assimilation);
-                canopies.Add(new CanopyAttributes(parameters, sunlit, shaded, 3, layer, layerCount));
+                canopies.Add(new CanopyAttributes(parameters, sunlit, shaded, windSpeed, layer, layerCount));
             }
             var transpiration = new Transpiration(
                 parameters.Canopy, parameters.Pathway, new WaterInteraction(temperature),
