@@ -74,12 +74,14 @@ namespace UnitTests.DCaPST
                 Assert.That(outputs[0].Layers[0].SunlitLAI, Is.EqualTo(0.25));
                 Assert.That(outputs[0].Layers[0].SunlitTemperature, Is.EqualTo(23));
                 Assert.That(outputs[0].Layers[0].SunlitAssimilation, Is.EqualTo(21));
+                Assert.That(outputs[0].Layers[0].SunlitWater, Is.EqualTo(22));
                 Assert.That(outputs[0].Layers[0].SunlitAc1, Is.EqualTo(24));
                 Assert.That(outputs[0].Layers[0].SunlitAc2, Is.EqualTo(25));
                 Assert.That(outputs[0].Layers[0].SunlitAj, Is.EqualTo(26));
                 Assert.That(outputs[0].Layers[0].ShadedLAI, Is.EqualTo(0.75));
                 Assert.That(outputs[0].Layers[0].ShadedTemperature, Is.EqualTo(33));
                 Assert.That(outputs[0].Layers[0].ShadedAssimilation, Is.EqualTo(31));
+                Assert.That(outputs[0].Layers[0].ShadedWater, Is.EqualTo(32));
                 Assert.That(outputs[0].Layers[0].ShadedAc1, Is.EqualTo(34));
                 Assert.That(outputs[0].Layers[0].ShadedAc2, Is.EqualTo(35));
                 Assert.That(outputs[0].Layers[0].ShadedAj, Is.EqualTo(36));

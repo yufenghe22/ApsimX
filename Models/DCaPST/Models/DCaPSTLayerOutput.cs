@@ -20,6 +20,10 @@ namespace Models.DCAPST
         [Units("umol CO2/m^2/s")]
         public double SunlitAssimilation { get; internal set; }
 
+        /// <summary>Sunlit transpiration in this layer.</summary>
+        [Units("mm")]
+        public double SunlitWater { get; internal set; }
+
         /// <summary>Sunlit AC1 pathway assimilation in this layer.</summary>
         [Units("umol CO2/m^2/s")]
         public double SunlitAc1 { get; internal set; }
@@ -43,6 +47,10 @@ namespace Models.DCAPST
         /// <summary>Shaded assimilation in this layer.</summary>
         [Units("umol CO2/m^2/s")]
         public double ShadedAssimilation { get; internal set; }
+
+        /// <summary>Shaded transpiration in this layer.</summary>
+        [Units("mm")]
+        public double ShadedWater { get; internal set; }
 
         /// <summary>Shaded AC1 pathway assimilation in this layer.</summary>
         [Units("umol CO2/m^2/s")]
