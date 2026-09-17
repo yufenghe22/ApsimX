@@ -104,6 +104,26 @@ namespace UnitTests.DCaPST
             Assert.That(result, Is.EqualTo(0.09));
         }
 
+        [Test]
+        public void CanopyLayerModelDefaultsToSingleLayer()
+        {
+            var model = new DCaPSTModelNG();
+
+            Assert.That(model.CanopyLayerModel, Is.EqualTo("Single-layer model"));
+            Assert.That(model.NumberOfCanopyLayers, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void MultiLayerModelUsesThreeLayers()
+        {
+            var model = new DCaPSTModelNG
+            {
+                CanopyLayerModel = "Multi-layer model"
+            };
+
+            Assert.That(model.NumberOfCanopyLayers, Is.EqualTo(3));
+        }
+
         #endregion
     }
 }

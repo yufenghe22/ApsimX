@@ -111,6 +111,20 @@ namespace Models.DCAPST.Canopy
             CO2AssimilationRate = 0;
             WaterUse = 0;
 
+            if (assimilation is not AssimilationCCM)
+            {
+                transpiration.SolveShared(pathways, assimilation, At25C, PhotonCount,
+                                          AbsorbedRadiation, LAI, temperature.AirTemperature);
+                double sharedRate = GetCO2Rate();
+                double sharedWater = GetWaterUse();
+                if (sharedRate > 0 && sharedWater > 0)
+                {
+                    CO2AssimilationRate = sharedRate;
+                    WaterUse = sharedWater;
+                }
+                return;
+            }
+
             // Do the initial iterations
             DoIterations(transpiration, temperature.AirTemperature, true);
 
@@ -135,7 +149,7 @@ namespace Models.DCAPST.Canopy
         private void DoIterations(Transpiration transpiration, double airTemp, bool updateTemperature)
         {
             pathways.ForEach(p => p.SetConditions(airTemp, LAI));
-            transpiration.SetConditions(At25C, PhotonCount, AbsorbedRadiation);
+            transpiration.SetConditions(At25C, PhotonCount, AbsorbedRadiation, LAI);
 
             for (int n = 0; n < assimilation.Iterations; n++)
             {
