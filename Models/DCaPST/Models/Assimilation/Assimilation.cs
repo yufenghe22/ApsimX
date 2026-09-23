@@ -78,7 +78,8 @@ namespace Models.DCAPST
         }
 
         /// <inheritdoc/>
-        public virtual void UpdateIntercellularCO2(AssimilationPathway pathway, double gt, double waterUseMolsSecond) 
+        public virtual void UpdateIntercellularCO2(AssimilationPathway pathway, double gt,
+                                                   double waterUseMolsSecond)
         { /*C4 & CCM overwrite this.*/ }
 
         /// <summary>

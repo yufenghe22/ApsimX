@@ -192,7 +192,7 @@ namespace Models.DCAPST.Environment
             // Transpiration in kilos of water per second
             double ekg = latentHeatOfVapourisation * availableWater / hrs_to_seconds;
             double rtw = (deltaAirVP * (radiation - netLongwaveLoss - ekg) +
-                          VPD * sAir / gbh) * gbh / (ekg * g);
+                          VPD * sAir / rbh) * rbh / (ekg * g);
             return rtw;
         }
 

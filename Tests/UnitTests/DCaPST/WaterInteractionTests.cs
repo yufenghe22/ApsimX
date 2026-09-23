@@ -52,7 +52,7 @@ namespace UnitTests.DCaPST
             var available = 0.15;
             var rn = 230;
 
-            var expected = 309.2097657757547;
+            var expected = 340.83946167121144;
 
             // Act
             var water = new WaterInteraction(temperature.Object);
@@ -115,6 +115,38 @@ namespace UnitTests.DCaPST
             // Assert
             Assert.That(actual, Is.EqualTo(expected));
             temperature.Verify();
+        }
+
+        [Test]
+        public void UnlimitedRtwUsesBoundaryLayerCO2ToCalculateStomatalConductance()
+        {
+            var temperature = new Mock<ITemperature>(MockBehavior.Loose);
+            temperature.Setup(t => t.AtmosphericPressure).Returns(1.01325);
+            temperature.Setup(t => t.AirMolarDensity).Returns(40.63);
+
+            const double boundaryHeatConductance = 0.127634;
+            const double assimilation = 4.5;
+            const double ambientCO2 = 380.0;
+            const double intercellularCO2 = 152.0;
+            const double boundaryWaterFactor = 1.37;
+            const double stomatalWaterFactor = 1.6;
+
+            double boundaryWaterConductance = boundaryHeatConductance / 0.92;
+            double boundaryCO2Conductance = temperature.Object.AtmosphericPressure *
+                temperature.Object.AirMolarDensity * boundaryWaterConductance / boundaryWaterFactor;
+            double boundaryLayerCO2 = ambientCO2 - assimilation / boundaryCO2Conductance;
+            double stomatalCO2Conductance = assimilation / (boundaryLayerCO2 - intercellularCO2);
+            double expectedResistance = temperature.Object.AirMolarDensity *
+                temperature.Object.AtmosphericPressure *
+                (1.0 / (stomatalWaterFactor * stomatalCO2Conductance) +
+                 1.0 / (boundaryWaterFactor * boundaryCO2Conductance));
+
+            var water = new WaterInteraction(temperature.Object);
+            water.SetConditions(boundaryHeatConductance, 0.0);
+            water.LeafTemp = 27.0;
+
+            Assert.That(water.UnlimitedWaterResistance(assimilation, ambientCO2, intercellularCO2),
+                Is.EqualTo(expectedResistance).Within(1e-12));
         }
 
         [Test]

@@ -212,6 +212,10 @@ namespace Models.DCAPST.Canopy
                 Water = WaterUse,
                 Temperature = limitingPath.Temperature,
                 VPD = limitingPath.VPD,
+                IntercellularCO2 = limitingPath.IntercellularCO2,
+                MesophyllCO2 = limitingPath.MesophyllCO2,
+                MesophyllCO2Conductance = limitingPath.MesophyllCO2Conductance,
+                StomatalCO2Conductance = limitingPath.StomatalCO2Conductance,
                 Ac1 = ac1,
                 Ac2 = ac2,
                 Aj = aj
