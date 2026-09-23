@@ -1,5 +1,6 @@
 using Models.Core;
 using System;
+using System.Linq;
 
 namespace Models.DCAPST
 {
@@ -14,6 +15,7 @@ namespace Models.DCAPST
         /// </summary>
         public DCaPSTIntervalOutput()
         {
+            Layers = Array.Empty<DCaPSTLayerOutput>();
         }
 
         /// <summary>Creates an output from a calculated DCaPST interval.</summary>
@@ -31,6 +33,10 @@ namespace Models.DCAPST
             SunlitWater = interval.Sunlit.Water;
             SunlitTemperature = interval.Sunlit.Temperature;
             SunlitVPD = interval.Sunlit.VPD;
+            SunlitIntercellularCO2 = interval.Sunlit.IntercellularCO2;
+            SunlitMesophyllCO2 = interval.Sunlit.MesophyllCO2;
+            SunlitMesophyllCO2Conductance = interval.Sunlit.MesophyllCO2Conductance;
+            SunlitStomatalCO2Conductance = interval.Sunlit.StomatalCO2Conductance;
             SunlitAc1 = interval.Sunlit.Ac1.Assimilation;
             SunlitAc2 = interval.Sunlit.Ac2.Assimilation;
             SunlitAj = interval.Sunlit.Aj.Assimilation;
@@ -39,9 +45,42 @@ namespace Models.DCAPST
             ShadedWater = interval.Shaded.Water;
             ShadedTemperature = interval.Shaded.Temperature;
             ShadedVPD = interval.Shaded.VPD;
+            ShadedIntercellularCO2 = interval.Shaded.IntercellularCO2;
+            ShadedMesophyllCO2 = interval.Shaded.MesophyllCO2;
+            ShadedMesophyllCO2Conductance = interval.Shaded.MesophyllCO2Conductance;
+            ShadedStomatalCO2Conductance = interval.Shaded.StomatalCO2Conductance;
             ShadedAc1 = interval.Shaded.Ac1.Assimilation;
             ShadedAc2 = interval.Shaded.Ac2.Assimilation;
             ShadedAj = interval.Shaded.Aj.Assimilation;
+
+            Layers = interval.Layers?
+                .Select((values, index) => new DCaPSTLayerOutput
+                {
+                    Layer = index + 1,
+                    SunlitLAI = values.SunlitLAI,
+                    SunlitTemperature = values.Sunlit.Temperature,
+                    SunlitAssimilation = values.Sunlit.A,
+                    SunlitWater = values.Sunlit.Water,
+                    SunlitIntercellularCO2 = values.Sunlit.IntercellularCO2,
+                    SunlitMesophyllCO2 = values.Sunlit.MesophyllCO2,
+                    SunlitMesophyllCO2Conductance = values.Sunlit.MesophyllCO2Conductance,
+                    SunlitStomatalCO2Conductance = values.Sunlit.StomatalCO2Conductance,
+                    SunlitAc1 = values.Sunlit.Ac1.Assimilation,
+                    SunlitAc2 = values.Sunlit.Ac2.Assimilation,
+                    SunlitAj = values.Sunlit.Aj.Assimilation,
+                    ShadedLAI = values.ShadedLAI,
+                    ShadedTemperature = values.Shaded.Temperature,
+                    ShadedAssimilation = values.Shaded.A,
+                    ShadedWater = values.Shaded.Water,
+                    ShadedIntercellularCO2 = values.Shaded.IntercellularCO2,
+                    ShadedMesophyllCO2 = values.Shaded.MesophyllCO2,
+                    ShadedMesophyllCO2Conductance = values.Shaded.MesophyllCO2Conductance,
+                    ShadedStomatalCO2Conductance = values.Shaded.StomatalCO2Conductance,
+                    ShadedAc1 = values.Shaded.Ac1.Assimilation,
+                    ShadedAc2 = values.Shaded.Ac2.Assimilation,
+                    ShadedAj = values.Shaded.Aj.Assimilation
+                })
+                .ToArray() ?? Array.Empty<DCaPSTLayerOutput>();
 
             double totalLAI = SunlitLAI + ShadedLAI;
             CanopyTemperature = LAIWeightedMean(SunlitTemperature, SunlitLAI, ShadedTemperature, ShadedLAI, totalLAI);
@@ -58,6 +97,9 @@ namespace Models.DCAPST
         /// <summary>Air temperature during the interval.</summary>
         [Units("°C")]
         public double AirTemperature { get; private set; }
+
+        /// <summary>Values for each physical canopy layer, ordered from top to bottom.</summary>
+        public DCaPSTLayerOutput[] Layers { get; private set; }
 
         /// <summary>Leaf area index of the sunlit canopy.</summary>
         [Units("m^2/m^2")]
@@ -91,6 +133,22 @@ namespace Models.DCAPST
         [Units("kPa")]
         public double SunlitVPD { get; private set; }
 
+        /// <summary>Sunlit intercellular CO2 partial pressure.</summary>
+        [Units("microbar")]
+        public double SunlitIntercellularCO2 { get; private set; }
+
+        /// <summary>Sunlit mesophyll CO2 partial pressure.</summary>
+        [Units("microbar")]
+        public double SunlitMesophyllCO2 { get; private set; }
+
+        /// <summary>Sunlit mesophyll CO2 conductance.</summary>
+        [Units("mol CO2/m^2/s/bar")]
+        public double SunlitMesophyllCO2Conductance { get; private set; }
+
+        /// <summary>Sunlit stomatal CO2 conductance.</summary>
+        [Units("mol CO2/m^2/s")]
+        public double SunlitStomatalCO2Conductance { get; private set; }
+
         /// <summary>Sunlit AC1 pathway assimilation.</summary>
         [Units("umol CO2/m^2/s")]
         public double SunlitAc1 { get; private set; }
@@ -118,6 +176,22 @@ namespace Models.DCAPST
         /// <summary>Shaded canopy vapour pressure deficit.</summary>
         [Units("kPa")]
         public double ShadedVPD { get; private set; }
+
+        /// <summary>Shaded intercellular CO2 partial pressure.</summary>
+        [Units("microbar")]
+        public double ShadedIntercellularCO2 { get; private set; }
+
+        /// <summary>Shaded mesophyll CO2 partial pressure.</summary>
+        [Units("microbar")]
+        public double ShadedMesophyllCO2 { get; private set; }
+
+        /// <summary>Shaded mesophyll CO2 conductance.</summary>
+        [Units("mol CO2/m^2/s/bar")]
+        public double ShadedMesophyllCO2Conductance { get; private set; }
+
+        /// <summary>Shaded stomatal CO2 conductance.</summary>
+        [Units("mol CO2/m^2/s")]
+        public double ShadedStomatalCO2Conductance { get; private set; }
 
         /// <summary>Shaded AC1 pathway assimilation.</summary>
         [Units("umol CO2/m^2/s")]

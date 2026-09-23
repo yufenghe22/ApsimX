@@ -74,7 +74,7 @@
         {
             return new PathwayParameters()
             {
-                IntercellularToAirCO2Ratio = 0.7,
+                IntercellularToBoundaryLayerCO2Ratio = 0.7,
                 FractionOfCyclicElectronFlow = DEFAULT_FRACTION_OF_CYCLIC_ELECTRON_FLOW,
                 RespirationSLNRatio = 0.0 * PSI_FACTOR,
                 MaxRubiscoActivitySLNRatio = 1.45 * PSI_FACTOR,

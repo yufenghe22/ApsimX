@@ -27,9 +27,10 @@ namespace Models.DCAPST
         }
 
         /// <inheritdoc/>
-        public override void UpdateIntercellularCO2(AssimilationPathway pathway, double gt, double waterUseMolsSecond)
+        public override void UpdateIntercellularCO2(AssimilationPathway pathway, double gt,
+                                                    double waterUseMolsSecond)
         {
-            pathway.IntercellularCO2 = ((gt - waterUseMolsSecond / 2.0) * ambientCO2 - pathway.CO2Rate) / (gt + waterUseMolsSecond / 2.0);
+            pathway.IntercellularCO2 = ambientCO2 - pathway.CO2Rate / gt;
         }
 
         /// <inheritdoc/>
