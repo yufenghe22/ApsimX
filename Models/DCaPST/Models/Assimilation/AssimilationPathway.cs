@@ -53,6 +53,16 @@ namespace Models.DCAPST
         public double MesophyllCO2 { get; set; }
 
         /// <summary>
+        /// Mesophyll CO2 conductance (mol CO2 m-2 ground s-1 bar-1)
+        /// </summary>
+        public double MesophyllCO2Conductance { get; set; }
+
+        /// <summary>
+        /// Stomatal CO2 conductance (mol CO2 m-2 ground s-1)
+        /// </summary>
+        public double StomatalCO2Conductance { get; set; }
+
+        /// <summary>
         /// Chloroplastic CO2 partial pressure at the site of Rubisco carboxylation (microbar)
         /// </summary>
         public double ChloroplasticCO2 { get; set; }
@@ -118,7 +128,11 @@ namespace Models.DCAPST
                 Assimilation = CO2Rate,
                 Water = WaterUse,
                 Temperature = Temperature,
-                VPD = VPD
+                VPD = VPD,
+                IntercellularCO2 = IntercellularCO2,
+                MesophyllCO2 = MesophyllCO2,
+                MesophyllCO2Conductance = MesophyllCO2Conductance,
+                StomatalCO2Conductance = StomatalCO2Conductance
             };
 
             return values;

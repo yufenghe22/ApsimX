@@ -59,6 +59,10 @@ namespace UnitTests.DCaPST
                 Assert.That(outputs[0].SunlitWater, Is.EqualTo(2));
                 Assert.That(outputs[0].SunlitTemperature, Is.EqualTo(3));
                 Assert.That(outputs[0].SunlitVPD, Is.EqualTo(7));
+                Assert.That(outputs[0].SunlitIntercellularCO2, Is.EqualTo(8));
+                Assert.That(outputs[0].SunlitMesophyllCO2, Is.EqualTo(9));
+                Assert.That(outputs[0].SunlitMesophyllCO2Conductance, Is.EqualTo(10));
+                Assert.That(outputs[0].SunlitStomatalCO2Conductance, Is.EqualTo(11));
                 Assert.That(outputs[0].SunlitAc1, Is.EqualTo(4));
                 Assert.That(outputs[0].SunlitAc2, Is.EqualTo(5));
                 Assert.That(outputs[0].SunlitAj, Is.EqualTo(6));
@@ -75,6 +79,8 @@ namespace UnitTests.DCaPST
                 Assert.That(outputs[0].Layers[0].SunlitTemperature, Is.EqualTo(23));
                 Assert.That(outputs[0].Layers[0].SunlitAssimilation, Is.EqualTo(21));
                 Assert.That(outputs[0].Layers[0].SunlitWater, Is.EqualTo(22));
+                Assert.That(outputs[0].Layers[0].SunlitIntercellularCO2, Is.EqualTo(28));
+                Assert.That(outputs[0].Layers[0].SunlitMesophyllCO2, Is.EqualTo(29));
                 Assert.That(outputs[0].Layers[0].SunlitAc1, Is.EqualTo(24));
                 Assert.That(outputs[0].Layers[0].SunlitAc2, Is.EqualTo(25));
                 Assert.That(outputs[0].Layers[0].SunlitAj, Is.EqualTo(26));
@@ -172,6 +178,10 @@ namespace UnitTests.DCaPST
                 Water = value + 1,
                 Temperature = value + 2,
                 VPD = value + 6,
+                IntercellularCO2 = value + 7,
+                MesophyllCO2 = value + 8,
+                MesophyllCO2Conductance = value + 9,
+                StomatalCO2Conductance = value + 10,
                 Ac1 = new PathValues { Assimilation = value + 3 },
                 Ac2 = new PathValues { Assimilation = value + 4 },
                 Aj = new PathValues { Assimilation = value + 5 }

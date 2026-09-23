@@ -27,6 +27,18 @@
         /// </summary>
         public double VPD;
 
+        /// <summary>Intercellular CO2 partial pressure for the limiting pathway.</summary>
+        public double IntercellularCO2;
+
+        /// <summary>Mesophyll CO2 partial pressure for the limiting pathway.</summary>
+        public double MesophyllCO2;
+
+        /// <summary>Mesophyll CO2 conductance for the limiting pathway.</summary>
+        public double MesophyllCO2Conductance;
+
+        /// <summary>Stomatal CO2 conductance for the limiting pathway.</summary>
+        public double StomatalCO2Conductance;
+
         /// <summary>
         /// 
         /// </summary>

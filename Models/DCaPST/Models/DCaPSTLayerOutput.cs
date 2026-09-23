@@ -24,6 +24,22 @@ namespace Models.DCAPST
         [Units("mm")]
         public double SunlitWater { get; internal set; }
 
+        /// <summary>Sunlit intercellular CO2 partial pressure in this layer.</summary>
+        [Units("microbar")]
+        public double SunlitIntercellularCO2 { get; internal set; }
+
+        /// <summary>Sunlit mesophyll CO2 partial pressure in this layer.</summary>
+        [Units("microbar")]
+        public double SunlitMesophyllCO2 { get; internal set; }
+
+        /// <summary>Sunlit mesophyll CO2 conductance in this layer.</summary>
+        [Units("mol CO2/m^2/s/bar")]
+        public double SunlitMesophyllCO2Conductance { get; internal set; }
+
+        /// <summary>Sunlit stomatal CO2 conductance in this layer.</summary>
+        [Units("mol CO2/m^2/s")]
+        public double SunlitStomatalCO2Conductance { get; internal set; }
+
         /// <summary>Sunlit AC1 pathway assimilation in this layer.</summary>
         [Units("umol CO2/m^2/s")]
         public double SunlitAc1 { get; internal set; }
@@ -51,6 +67,22 @@ namespace Models.DCAPST
         /// <summary>Shaded transpiration in this layer.</summary>
         [Units("mm")]
         public double ShadedWater { get; internal set; }
+
+        /// <summary>Shaded intercellular CO2 partial pressure in this layer.</summary>
+        [Units("microbar")]
+        public double ShadedIntercellularCO2 { get; internal set; }
+
+        /// <summary>Shaded mesophyll CO2 partial pressure in this layer.</summary>
+        [Units("microbar")]
+        public double ShadedMesophyllCO2 { get; internal set; }
+
+        /// <summary>Shaded mesophyll CO2 conductance in this layer.</summary>
+        [Units("mol CO2/m^2/s/bar")]
+        public double ShadedMesophyllCO2Conductance { get; internal set; }
+
+        /// <summary>Shaded stomatal CO2 conductance in this layer.</summary>
+        [Units("mol CO2/m^2/s")]
+        public double ShadedStomatalCO2Conductance { get; internal set; }
 
         /// <summary>Shaded AC1 pathway assimilation in this layer.</summary>
         [Units("umol CO2/m^2/s")]

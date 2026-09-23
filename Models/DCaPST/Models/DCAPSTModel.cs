@@ -497,6 +497,10 @@ namespace Models.DCAPST
                 Water = areas.Sum(area => area.Water),
                 Temperature = WeightedMean(areas.Select(area => area.Temperature).ToArray(), lais, totalLai),
                 VPD = WeightedMean(areas.Select(area => area.VPD).ToArray(), lais, totalLai),
+                IntercellularCO2 = WeightedMean(areas.Select(area => area.IntercellularCO2).ToArray(), lais, totalLai),
+                MesophyllCO2 = WeightedMean(areas.Select(area => area.MesophyllCO2).ToArray(), lais, totalLai),
+                MesophyllCO2Conductance = areas.Sum(area => area.MesophyllCO2Conductance),
+                StomatalCO2Conductance = areas.Sum(area => area.StomatalCO2Conductance),
                 Ac1 = AggregatePath(areas.Select(area => area.Ac1).ToArray(), lais, totalLai),
                 Ac2 = AggregatePath(areas.Select(area => area.Ac2).ToArray(), lais, totalLai),
                 Aj = AggregatePath(areas.Select(area => area.Aj).ToArray(), lais, totalLai)
@@ -510,7 +514,11 @@ namespace Models.DCAPST
                 Assimilation = paths.Sum(path => path.Assimilation),
                 Water = paths.Sum(path => path.Water),
                 Temperature = WeightedMean(paths.Select(path => path.Temperature).ToArray(), lais, totalLai),
-                VPD = WeightedMean(paths.Select(path => path.VPD).ToArray(), lais, totalLai)
+                VPD = WeightedMean(paths.Select(path => path.VPD).ToArray(), lais, totalLai),
+                IntercellularCO2 = WeightedMean(paths.Select(path => path.IntercellularCO2).ToArray(), lais, totalLai),
+                MesophyllCO2 = WeightedMean(paths.Select(path => path.MesophyllCO2).ToArray(), lais, totalLai),
+                MesophyllCO2Conductance = paths.Sum(path => path.MesophyllCO2Conductance),
+                StomatalCO2Conductance = paths.Sum(path => path.StomatalCO2Conductance)
             };
         }
 
