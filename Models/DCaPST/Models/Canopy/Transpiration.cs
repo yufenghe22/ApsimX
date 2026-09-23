@@ -176,13 +176,13 @@ namespace Models.DCAPST.Canopy
                     AssimilationFunction function = assimilation.GetFunction(candidate, leaf);
                     if (Limited)
                     {
-                        function.Ci = ambientCO2;
-                        function.Rm = LimitedCO2Resistance(totalCO2Conductance, leaf.GmT);
+                        function.CmIntercept = ambientCO2;
+                        function.CmSlope = LimitedCO2Resistance(totalCO2Conductance, leaf.GmT);
                     }
                     else
                     {
-                        function.Ci = UnlimitedCO2Intercept(ratio, ambientCO2);
-                        function.Rm = UnlimitedCO2Resistance(
+                        function.CmIntercept = UnlimitedCO2Intercept(ratio, ambientCO2);
+                        function.CmSlope = UnlimitedCO2Resistance(
                             ratio, water.BoundaryCO2Conductance, leaf.GmT);
                     }
                     rates[index] = function.Value();
@@ -329,8 +329,8 @@ namespace Models.DCAPST.Canopy
                 double Gt = water.TotalCO2Conductance(Resistance);
 
                 // Update function parameters
-                func.Ci = ambientCO2;
-                func.Rm = LimitedCO2Resistance(Gt, leaf.GmT);
+                func.CmIntercept = ambientCO2;
+                func.CmSlope = LimitedCO2Resistance(Gt, leaf.GmT);
 
                 // Update pathway
                 pathway.CO2Rate = func.Value();
@@ -341,17 +341,17 @@ namespace Models.DCAPST.Canopy
             }
             else
             {
-                double ratio = this.pathway.IntercellularToBoundaryLayerCO2Ratio;
+                double ratio_Ci_Cbl = this.pathway.IntercellularToBoundaryLayerCO2Ratio;
 
                 // Update function parameters
-                func.Ci = UnlimitedCO2Intercept(ratio, ambientCO2);
-                func.Rm = UnlimitedCO2Resistance(
-                    ratio, water.BoundaryCO2Conductance, leaf.GmT);
+                func.CmIntercept = UnlimitedCO2Intercept(ratio_Ci_Cbl, ambientCO2);
+                func.CmSlope = UnlimitedCO2Resistance(
+                    ratio_Ci_Cbl, water.BoundaryCO2Conductance, leaf.GmT);
 
                 // Update pathway
                 pathway.CO2Rate = func.Value();
                 pathway.IntercellularCO2 = UnlimitedIntercellularCO2(
-                    ratio, ambientCO2, pathway.CO2Rate, water.BoundaryCO2Conductance);
+                    ratio_Ci_Cbl, ambientCO2, pathway.CO2Rate, water.BoundaryCO2Conductance);
                 pathway.MesophyllCO2Conductance = leaf.GmT;
                 double boundaryLayerCO2 = ambientCO2 -
                     pathway.CO2Rate / water.BoundaryCO2Conductance;
