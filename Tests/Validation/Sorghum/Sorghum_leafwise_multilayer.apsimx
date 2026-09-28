@@ -28,7 +28,7 @@
                     {
                       "$type": "Models.PostSimulationTools.ExcelInput, Models",
                       "FileNames": [
-                        "obs\\Observed.xlsx"
+                        "obs/Observed.xlsx"
                       ],
                       "SheetNames": [
                         "Observed"
@@ -42,7 +42,7 @@
                     {
                       "$type": "Models.PostSimulationTools.ExcelInput, Models",
                       "FileNames": [
-                        "obs\\DailyObserved.xlsx"
+                        "obs/DailyObserved.xlsx"
                       ],
                       "SheetNames": [
                         "DailyObserved"
@@ -114,6 +114,20 @@
       "Name": "Replacements",
       "ResourceName": null,
       "Children": [
+        {
+          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+          "CropName": "Sorghum",
+          "Biolimit": 0.0,
+          "Reduction": 0.0,
+          "CanopyLayerModel": "Multi-layer model",
+          "RubiscoLimitedModifier": 1.0,
+          "ElectronTransportLimitedModifier": 1.0,
+          "Name": "DCaPST",
+          "ResourceName": null,
+          "Children": [],
+          "Enabled": true,
+          "ReadOnly": false
+        },
         {
           "$type": "Models.Report, Models",
           "VariableNames": [
@@ -327,7 +341,8 @@
             "// Yield",
             "[Sorghum].AboveGround.Wt // g/m2 - Biomass (kg/ha) in old Apsim",
             "[Sorghum].Leaf.LaiAnth as LaiAnth",
-            "max of [Sorghum].Leaf.LAI from [Sorghum].Sowing to [Sorghum].Harvesting as LAImax"
+            "max of [Sorghum].Leaf.LAI from [Sorghum].Sowing to [Sorghum].Harvesting as LAImax",
+            "[DCaPST].CanopyLayerModel as CanopyLayerModel"
           ],
           "EventNames": [
             "[Sorghum].Harvesting"
@@ -464,6 +479,54 @@
           ],
           "Parameters": [],
           "Name": "HarvestingRule",
+          "ResourceName": null,
+          "Children": [],
+          "Enabled": true,
+          "ReadOnly": false
+        },
+        {
+          "$type": "Models.Report, Models",
+          "VariableNames": [
+            "[DCaPST].CurrentInterval.IntervalDateTime",
+            "[DCaPST].CurrentInterval.Hour",
+            "[DCaPST].CurrentInterval.AirTemperature",
+            "[DCaPST].CurrentInterval.SunlitAssimilation",
+            "[DCaPST].CurrentInterval.ShadedAssimilation",
+            "[DCaPST].CurrentInterval.SunlitWater",
+            "[DCaPST].CurrentInterval.ShadedWater",
+            "[DCaPST].CurrentInterval.SunlitTemperature",
+            "[DCaPST].CurrentInterval.ShadedTemperature",
+            "[DCaPST].CurrentInterval.SunlitAj",
+            "[DCaPST].CurrentInterval.ShadedAj",
+            "[DCaPST].CurrentInterval.SunlitAc1",
+            "[DCaPST].CurrentInterval.ShadedAc1",
+            "[DCaPST].CurrentInterval.Layers[1].SunlitAc1 as Layer1SunlitAc",
+            "[DCaPST].CurrentInterval.Layers[1].ShadedAc1 as Layer1ShadedAc",
+            "[DCaPST].CurrentInterval.Layers[1].SunlitAj as Layer1SunlitAj",
+            "[DCaPST].CurrentInterval.Layers[1].ShadedAj as Layer1ShadedAj",
+            "[DCaPST].CurrentInterval.Layers[1].SunlitWater as Layer1SunlitTrans",
+            "[DCaPST].CurrentInterval.Layers[1].ShadedWater as Layer1ShadedTrans",
+            "[DCaPST].CurrentInterval.Layers[2].SunlitAc1 as Layer2SunlitAc",
+            "[DCaPST].CurrentInterval.Layers[2].ShadedAc1 as Layer2ShadedAc",
+            "[DCaPST].CurrentInterval.Layers[2].SunlitAj as Layer2SunlitAj",
+            "[DCaPST].CurrentInterval.Layers[2].ShadedAj as Layer2ShadedAj",
+            "[DCaPST].CurrentInterval.Layers[2].SunlitWater as Layer2SunlitTrans",
+            "[DCaPST].CurrentInterval.Layers[2].ShadedWater as Layer2ShadedTrans",
+            "[DCaPST].CurrentInterval.Layers[3].SunlitAc1 as Layer3SunlitAc",
+            "[DCaPST].CurrentInterval.Layers[3].ShadedAc1 as Layer3ShadedAc",
+            "[DCaPST].CurrentInterval.Layers[3].SunlitAj as Layer3SunlitAj",
+            "[DCaPST].CurrentInterval.Layers[3].ShadedAj as Layer3ShadedAj",
+            "[DCaPST].CurrentInterval.Layers[3].SunlitWater as Layer3SunlitTrans",
+            "[DCaPST].CurrentInterval.Layers[3].ShadedWater as Layer3ShadedTrans",
+            "[DCaPST].CurrentInterval.SunlitLAI",
+            "[DCaPST].CurrentInterval.ShadedLAI",
+            "[DCaPST].DcapstModel.InterceptedRadiation"
+          ],
+          "EventNames": [
+            "[DCaPST].IntervalStep"
+          ],
+          "GroupByVariableName": null,
+          "Name": "HourlyReport",
           "ResourceName": null,
           "Children": [],
           "Enabled": true,
@@ -1168,7 +1231,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -2071,6 +2145,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -2218,7 +2317,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -3107,6 +3217,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -3184,7 +3319,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -4038,6 +4184,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -4158,7 +4329,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -5012,6 +5194,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -5164,7 +5371,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -6067,6 +6285,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -6146,7 +6389,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -7035,6 +7289,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -7180,7 +7459,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -8006,6 +8296,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -8151,7 +8466,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -8977,6 +9303,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -9102,7 +9453,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -9959,6 +10321,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -10076,7 +10463,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -10950,6 +11348,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -11066,7 +11489,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -11979,6 +12413,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -12348,7 +12807,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -13169,6 +13639,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -13293,7 +13788,18 @@
                       "ExcelWorkSheetName": "",
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -14611,6 +15117,31 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -14768,7 +15299,18 @@
                       "ExcelWorkSheetName": null,
                       "Name": "Weather",
                       "ResourceName": null,
-                      "Children": [],
+                      "Children": [
+                        {
+                          "$type": "Models.Climate.CO2Value, Models",
+                          "FileName": "",
+                          "ConstantValue": 364.0,
+                          "Name": "CO2Value",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        }
+                      ],
                       "Enabled": true,
                       "ReadOnly": false
                     },
@@ -15569,6 +16111,31 @@
                           "InitialCNR": 80.0,
                           "Name": "SurfaceOrganicMatter",
                           "ResourceName": "SurfaceOrganicMatter",
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.Report, Models",
+                          "VariableNames": null,
+                          "EventNames": null,
+                          "GroupByVariableName": null,
+                          "Name": "HourlyReport",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.DCAPST.DCaPSTModelNG, Models",
+                          "CropName": "Sorghum",
+                          "Biolimit": 0.0,
+                          "Reduction": 0.0,
+                          "CanopyLayerModel": "Single-layer model",
+                          "RubiscoLimitedModifier": 1.0,
+                          "ElectronTransportLimitedModifier": 1.0,
+                          "Name": "DCaPST",
+                          "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
