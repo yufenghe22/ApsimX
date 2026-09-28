@@ -8,7 +8,7 @@
         /// <summary>
         /// Sets the current conditions of the leaf water model
         /// </summary>
-        void SetConditions(double gbs, double radiation);
+        void SetConditions(double gbs, double radiation, double leafAreaIndex = 1.0);
 
         /// <summary>
         /// Calculates the resistance to water when supply is unlimited
@@ -47,5 +47,8 @@
 
         /// <summary> Leaf to air vapour pressure deficit </summary>
         double VPD { get; }
+
+        /// <summary>Boundary-layer conductance to CO2.</summary>
+        double BoundaryCO2Conductance { get; }
     }
 }

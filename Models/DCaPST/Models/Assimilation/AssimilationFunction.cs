@@ -21,14 +21,14 @@ namespace Models.DCAPST
         public Terms x;
 
         /// <summary>
-        /// Intercellular CO2
+        /// Intercept of the mesophyll CO2 relationship
         /// </summary>
-        public double Ci;
+        public double CmIntercept;
 
         /// <summary>
-        /// Mesophyll resistance
+        /// Slope of the mesophyll CO2 relationship
         /// </summary>
-        public double Rm;
+        public double CmSlope;
 
         /// <summary>
         /// Mesophyll respiration
@@ -63,8 +63,8 @@ namespace Models.DCAPST
             double gbs = BundleSheathConductance;
             double R_d = Respiration;
 
-            double p = Ci;
-            double q = Rm;
+            double p = CmIntercept;
+            double q = CmSlope;
 
             var n1 = R_d - x._1;
             var n2 = p * x._3 + x._4;

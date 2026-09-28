@@ -53,12 +53,12 @@ namespace Models.DCAPST.Canopy
         /// <summary>
         /// The accumulated LAI of all layers up to the Nth layer
         /// </summary>
-        private readonly double AccumLAI_1;
+        public double AccumLAI_1 { get; }
 
         /// <summary>
         /// The accumulated LAI of all layers up to the (N - 1)th layer
         /// </summary>
-        private readonly double AccumLAI_0;
+        public double AccumLAI_0 { get; }
 
         /// <summary>
         /// 
@@ -66,11 +66,20 @@ namespace Models.DCAPST.Canopy
         /// <param name="layers"></param>
         /// <param name="lai"></param>
         public CanopyRadiation(int layers, double lai)
+            : this(layers, layers, lai)
         {
+        }
+
+        /// <summary>Creates the radiation integrator for one layer of a multilayer canopy.</summary>
+        public CanopyRadiation(int layer, int layers, double lai)
+        {
+            if (layers < 1 || layer < 1 || layer > layers)
+                throw new ArgumentOutOfRangeException(nameof(layer), "Layer must be within the canopy layer count.");
+
             var layerLAI = lai / layers;
 
-            AccumLAI_1 = layers * layerLAI;
-            AccumLAI_0 = (layers - 1) * layerLAI;
+            AccumLAI_1 = layer * layerLAI;
+            AccumLAI_0 = (layer - 1) * layerLAI;
         }
 
         /// <summary>
@@ -144,7 +153,9 @@ namespace Models.DCAPST.Canopy
         /// </summary>
         public double CalculateSunlitLAI()
         {
-            return CalcExp(DirectExtinction) / DirectExtinction;
+            return Math.Abs(DirectExtinction) < 1e-12
+                ? 0.0
+                : CalcExp(DirectExtinction) / DirectExtinction;
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace UnitTests.DCaPST
             Assert.That(cropParams.Canopy.MinimumN, Is.EqualTo(28.6));
             Assert.That(cropParams.Canopy.SLNRatioTop, Is.EqualTo(1.00001));
 
-            Assert.That(cropParams.Pathway.IntercellularToAirCO2Ratio, Is.EqualTo(0.45));
+            Assert.That(cropParams.Pathway.IntercellularToBoundaryLayerCO2Ratio, Is.EqualTo(0.45));
             Assert.That(cropParams.Pathway.FractionOfCyclicElectronFlow, Is.EqualTo(0.5));
             Assert.That(cropParams.Pathway.RespirationSLNRatio, Is.EqualTo(0.0));
             Assert.That(cropParams.Pathway.MaxRubiscoActivitySLNRatio, Is.EqualTo(0.63));

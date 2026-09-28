@@ -24,6 +24,9 @@ namespace Models.DCAPST.Canopy
         /// </summary>
         public int Layers { get; set; } = 1;
 
+        /// <summary>One-based index of the layer represented by this object.</summary>
+        public int Layer { get; set; } = 1;
+
         private const double KG_TO_G = 1000.0;
         private const double MOLAR_MASS_NITROGEN = 14.0;
 
@@ -46,12 +49,16 @@ namespace Models.DCAPST.Canopy
             DCaPSTParameters dcapstParameters,
             IAssimilationArea sunlit,
             IAssimilationArea shaded,
-            double windspeed
+            double windspeed,
+            int layer = 1,
+            int layers = 1
         )
         {
             _pathwayParameters = dcapstParameters.Pathway;
             _canopyParameters = dcapstParameters.Canopy;
             _windspeed = Math.Max(windspeed, 0.0);
+            Layer = layer;
+            Layers = layers;
             Sunlit = sunlit;
             Shaded = shaded;
         }
@@ -74,13 +81,16 @@ namespace Models.DCAPST.Canopy
         /// </summary>
         public void InitialiseDay(double lai, double sln)
         {
+            if (Layers < 1 || Layer < 1 || Layer > Layers)
+                throw new ArgumentOutOfRangeException(nameof(Layers), "Canopy layers must be positive and include the current layer.");
+
             _lai = lai;
             var NcAv = sln * KG_TO_G / MOLAR_MASS_NITROGEN;
             _leafNTopCanopy = _canopyParameters.SLNRatioTop * NcAv;
 
             _nitrogenAllocation = -1 * Math.Log((NcAv - _canopyParameters.MinimumN) / (_leafNTopCanopy - _canopyParameters.MinimumN)) * 2;
 
-            _absorbed = new CanopyRadiation(Layers, _lai)
+            _absorbed = new CanopyRadiation(Layer, Layers, _lai)
             {
                 DiffuseExtinction = GetReducedExtinctionCoeffecient(_canopyParameters.DiffuseExtCoeff),
                 LeafScattering = _canopyParameters.LeafScatteringCoeff,
@@ -108,7 +118,9 @@ namespace Models.DCAPST.Canopy
             var a = 0.5 * _canopyParameters.WindSpeedExtinction;
             var b = 0.01 * Math.Pow(_windspeed / _canopyParameters.LeafWidth, 0.5);
 
-            return Math.Max(IntegrateBoundaryConductance(b, a, _lai), MINIMUM_BOUNDARY_HEAT_CONDUCTANCE);
+            double raw = IntegrateBoundaryConductance(b, a, _absorbed.AccumLAI_0, _absorbed.AccumLAI_1);
+            double layerMinimum = MINIMUM_BOUNDARY_HEAT_CONDUCTANCE / Layers;
+            return Math.Max(raw, layerMinimum);
         }
 
         /// <summary>
@@ -118,25 +130,26 @@ namespace Models.DCAPST.Canopy
         {
             var windExtinction = 0.5 * _canopyParameters.WindSpeedExtinction;
             var b = 0.01 * Math.Pow(_windspeed / _canopyParameters.LeafWidth, 0.5);
-            var rawTotal = IntegrateBoundaryConductance(b, windExtinction, _lai);
-            var rawSunlit = IntegrateBoundaryConductance(b, windExtinction + _absorbed.DirectExtinction, _lai);
+            var rawTotal = IntegrateBoundaryConductance(b, windExtinction, _absorbed.AccumLAI_0, _absorbed.AccumLAI_1);
+            var rawSunlit = IntegrateBoundaryConductance(b, windExtinction + _absorbed.DirectExtinction,
+                _absorbed.AccumLAI_0, _absorbed.AccumLAI_1);
 
             // Apply the canopy minimum once, then retain the calculated sunlit
             // fraction. At zero wind, partition the minimum by sunlit LAI.
             var sunlitFraction = rawTotal > 0.0
                 ? rawSunlit / rawTotal
-                : (_lai > 0.0 ? Sunlit.LAI / _lai : 0.0);
+                : (Sunlit.LAI + Shaded.LAI > 0.0 ? Sunlit.LAI / (Sunlit.LAI + Shaded.LAI) : 0.0);
 
             return CalcBoundaryHeatConductance() * Math.Clamp(sunlitFraction, 0.0, 1.0);
         }
 
         /// <summary>Integrates exponentially attenuated conductance over canopy LAI.</summary>
-        private static double IntegrateBoundaryConductance(double conductanceAtCanopyTop, double extinction, double lai)
+        private static double IntegrateBoundaryConductance(double conductanceAtCanopyTop, double extinction, double l0, double l1)
         {
             if (Math.Abs(extinction) < 1e-12)
-                return conductanceAtCanopyTop * lai;
+                return conductanceAtCanopyTop * (l1 - l0);
 
-            return conductanceAtCanopyTop * (1 - Math.Exp(-extinction * lai)) / extinction;
+            return conductanceAtCanopyTop * (Math.Exp(-extinction * l0) - Math.Exp(-extinction * l1)) / extinction;
         }
 
         /// <summary>
@@ -171,10 +184,11 @@ namespace Models.DCAPST.Canopy
         /// </summary>
         private double CalcMaximumRate(double psi, double coefficient)
         {
-            var factor = _lai * (_leafNTopCanopy - _canopyParameters.MinimumN) * psi;
-            var exp = _absorbed.CalcExp(coefficient / _lai);
-
-            return factor * exp / coefficient;
+            double scaledCoefficient = coefficient / _lai;
+            double integral = Math.Abs(scaledCoefficient) < 1e-12
+                ? _absorbed.AccumLAI_1 - _absorbed.AccumLAI_0
+                : _absorbed.CalcExp(scaledCoefficient) / scaledCoefficient;
+            return (_leafNTopCanopy - _canopyParameters.MinimumN) * psi * integral;
         }
 
         /// <summary>
@@ -183,7 +197,7 @@ namespace Models.DCAPST.Canopy
         private void CalcLAI()
         {
             Sunlit.LAI = _absorbed.CalculateSunlitLAI();
-            Shaded.LAI = _lai - Sunlit.LAI;
+            Shaded.LAI = (_absorbed.AccumLAI_1 - _absorbed.AccumLAI_0) - Sunlit.LAI;
         }
 
         /// <summary>
