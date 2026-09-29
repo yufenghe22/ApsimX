@@ -293,7 +293,9 @@
             "[Arbitrator].N.TotalPlantDemand as TotalPlantNDemand",
             "[Phenology].DltTT.Stress as stress",
             "[Arbitrator].NitrogenUptakeMethod.NDiffusionSupply as NDiffusionSupply",
-            "[Arbitrator].NitrogenUptakeMethod.NMassFlowSupply as NMassFlowSupply"
+            "[Arbitrator].NitrogenUptakeMethod.NMassFlowSupply as NMassFlowSupply",
+            "[LeafWiseModel].EffectiveLeafWidth as LeafWiseWeff",
+            "[DCaPST].Parameters.Canopy.LeafWidth as DCaPSTLeafWidth"
           ],
           "EventNames": [
             "[Clock].DoReport"
@@ -2170,6 +2172,16 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -3242,6 +3254,16 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -4205,6 +4227,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -5215,6 +5247,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -6310,6 +6352,16 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -7310,6 +7362,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -8321,6 +8383,16 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -9324,6 +9396,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -10342,6 +10424,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -11369,6 +11461,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -12434,6 +12536,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -13660,6 +13772,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
@@ -15142,6 +15264,16 @@
                           "Children": [],
                           "Enabled": true,
                           "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
                         }
                       ],
                       "Enabled": true,
@@ -16135,6 +16267,16 @@
                           "RubiscoLimitedModifier": 1.0,
                           "ElectronTransportLimitedModifier": 1.0,
                           "Name": "DCaPST",
+                          "ResourceName": null,
+                          "Children": [],
+                          "Enabled": true,
+                          "ReadOnly": false
+                        },
+                        {
+                          "$type": "Models.LeafWise.LeafWiseModel, Models",
+                          "CropName": "Sorghum",
+                          "MaximumWidthRate": 11.7214951252813,
+                          "Name": "LeafWiseModel",
                           "ResourceName": null,
                           "Children": [],
                           "Enabled": true,
