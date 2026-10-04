@@ -156,10 +156,20 @@ namespace Models.LeafWise
 
         private IEnumerable<string> GetPlantNames()
         {
-            return Structure?.FindAll<IPlant>()
+            if (Structure == null)
+                return [];
+
+            var plants = Structure.FindAll<IPlant>();
+            if (Folder.IsUnderReplacementsFolder(this) != null)
+            {
+                var simulations = Structure.FindParent<Simulations>(recurse: true);
+                plants = Structure.FindChildren<IPlant>(recurse: true, relativeTo: simulations);
+            }
+
+            return plants
                 .Select(plant => plant.Name)
                 .Where(name => !string.IsNullOrEmpty(name))
-                .Distinct() ?? [];
+                .Distinct();
         }
 
         /// <summary>A leaf dimension calculated by LeafWise.</summary>
