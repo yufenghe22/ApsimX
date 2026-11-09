@@ -8,9 +8,9 @@ namespace Models.DCAPST
     public class PathwayParameters
     {
         /// <inheritdoc/>
-        [Description("Ratio of intercellular CO2 to air CO2")]
+        [Description("Ratio of intercellular CO2 to boundary-layer CO2")]
         [Units("")]
-        public double IntercellularToAirCO2Ratio { get; set; }
+        public double IntercellularToBoundaryLayerCO2Ratio { get; set; }
 
         /// <summary>
         /// Fraction of cyclic electron flow

@@ -25,11 +25,17 @@ namespace Models.Soils
         [field: NonSerialized]
         public IStructure Structure { private get; set; }
 
-        /// <summary>Finds the 'Physical' node.</summary>
-        private IPhysical Physical => Structure?.FindSibling<IPhysical>();
+        [Link]
+        private IPhysical physical = null;
 
-        /// <summary>Finds the 'SoilWater' node.</summary>
-        private ISoilWater WaterModel => Structure?.FindSibling<ISoilWater>();
+        private IPhysical Physical =>
+           physical ??= Structure?.FindSibling<IPhysical>();
+
+        [Link]
+        private ISoilWater waterModel = null;
+
+        private ISoilWater WaterModel =>
+           waterModel ??= Structure?.FindSibling<ISoilWater>();
 
         private double initialFractionFull = double.NaN;
 

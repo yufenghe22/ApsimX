@@ -15,8 +15,6 @@ namespace UnitTests.DCaPST
             // Assert
             Assert.That(cropParams.Rpar, Is.EqualTo(0.5));
             Assert.That(cropParams.AirO2, Is.EqualTo(210000));
-            Assert.That(cropParams.Windspeed, Is.EqualTo(1.5));
-
             Assert.That(cropParams.Canopy.Type, Is.EqualTo(CanopyType.C3));
             Assert.That(cropParams.Canopy.LeafAngle, Is.EqualTo(60));
             Assert.That(cropParams.Canopy.LeafWidth, Is.EqualTo(0.05));
@@ -33,7 +31,7 @@ namespace UnitTests.DCaPST
             Assert.That(cropParams.Canopy.MinimumN, Is.EqualTo(28.6));
             Assert.That(cropParams.Canopy.SLNRatioTop, Is.EqualTo(1.3));
 
-            Assert.That(cropParams.Pathway.IntercellularToAirCO2Ratio, Is.EqualTo(0.7));
+            Assert.That(cropParams.Pathway.IntercellularToBoundaryLayerCO2Ratio, Is.EqualTo(0.7));
             Assert.That(cropParams.Pathway.FractionOfCyclicElectronFlow, Is.EqualTo(0));
             Assert.That(cropParams.Pathway.RespirationSLNRatio, Is.EqualTo(0.0));
             Assert.That(cropParams.Pathway.MaxRubiscoActivitySLNRatio, Is.EqualTo(1.45));

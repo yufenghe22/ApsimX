@@ -25,7 +25,7 @@ namespace UnitTests.DCaPST
             var Ca = 380.0;
             var Ci = 152.0;
 
-            var expected = 1262.0178666386046;
+            var expected = 1304.7005034119043;
 
             // Act
             var water = new WaterInteraction(temperature.Object);
@@ -118,6 +118,38 @@ namespace UnitTests.DCaPST
         }
 
         [Test]
+        public void UnlimitedRtwUsesBoundaryLayerCO2ToCalculateStomatalConductance()
+        {
+            var temperature = new Mock<ITemperature>(MockBehavior.Loose);
+            temperature.Setup(t => t.AtmosphericPressure).Returns(1.01325);
+            temperature.Setup(t => t.AirMolarDensity).Returns(40.63);
+
+            const double boundaryHeatConductance = 0.127634;
+            const double assimilation = 4.5;
+            const double ambientCO2 = 380.0;
+            const double intercellularCO2 = 152.0;
+            const double boundaryWaterFactor = 1.37;
+            const double stomatalWaterFactor = 1.6;
+
+            double boundaryWaterConductance = boundaryHeatConductance / 0.92;
+            double boundaryCO2Conductance = temperature.Object.AtmosphericPressure *
+                temperature.Object.AirMolarDensity * boundaryWaterConductance / boundaryWaterFactor;
+            double boundaryLayerCO2 = ambientCO2 - assimilation / boundaryCO2Conductance;
+            double stomatalCO2Conductance = assimilation / (boundaryLayerCO2 - intercellularCO2);
+            double expectedResistance = temperature.Object.AirMolarDensity *
+                temperature.Object.AtmosphericPressure *
+                (1.0 / (stomatalWaterFactor * stomatalCO2Conductance) +
+                 1.0 / (boundaryWaterFactor * boundaryCO2Conductance));
+
+            var water = new WaterInteraction(temperature.Object);
+            water.SetConditions(boundaryHeatConductance, 0.0);
+            water.LeafTemp = 27.0;
+
+            Assert.That(water.UnlimitedWaterResistance(assimilation, ambientCO2, intercellularCO2),
+                Is.EqualTo(expectedResistance).Within(1e-12));
+        }
+
+        [Test]
         public void Temperature_WhenCalculated_ReturnsExpectedValue()
         {
             // Arrange
@@ -141,6 +173,41 @@ namespace UnitTests.DCaPST
 
             // Assert
             Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void LongwaveLossUsesFourthPowerTemperaturesAndAreaLai()
+        {
+            var temperature = new Mock<ITemperature>(MockBehavior.Loose);
+            temperature.Setup(t => t.AirTemperature).Returns(25.0);
+            temperature.Setup(t => t.MinTemperature).Returns(15.0);
+            const double leafTemperature = 30.0;
+            const double gbh = 0.1;
+            const double absorbedRadiation = 350.0;
+            const double areaLai = 0.7;
+            const double resistance = 700.0;
+            const double sigma = 0.0000000567;
+            const double psychrometric = 0.066;
+            const double heatCapacity = 1200.0;
+            const double latentHeat = 2447000.0;
+
+            double vapourPressureLeaf = 0.61365 * Math.Exp(17.502 * leafTemperature / (240.97 + leafTemperature));
+            double vapourPressureAir = 0.61365 * Math.Exp(17.502 * 25.0 / (240.97 + 25.0));
+            double vapourPressureAirPlusOne = 0.61365 * Math.Exp(17.502 * 26.0 / (240.97 + 26.0));
+            double vapourPressureMinimum = 0.61365 * Math.Exp(17.502 * 15.0 / (240.97 + 15.0));
+            double slope = vapourPressureAirPlusOne - vapourPressureAir;
+            double vpd = vapourPressureLeaf - vapourPressureMinimum;
+            double longwave = 2 * sigma * (Math.Pow(leafTemperature + 273.15, 4) -
+                                            Math.Pow(25.0 + 273.15, 4)) * areaLai;
+            double expectedLatent = (slope * (absorbedRadiation - longwave) + vpd * heatCapacity * gbh) /
+                                    (slope + psychrometric * resistance * gbh);
+            double expectedWater = expectedLatent / latentHeat * 3600.0;
+
+            var water = new WaterInteraction(temperature.Object);
+            water.SetConditions(gbh, absorbedRadiation, areaLai);
+            water.LeafTemp = leafTemperature;
+
+            Assert.That(water.HourlyWaterUse(resistance), Is.EqualTo(expectedWater).Within(1e-12));
         }
     }
 }

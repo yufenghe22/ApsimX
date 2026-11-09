@@ -19,7 +19,6 @@ namespace UnitTests.DCaPST
             // Assert
             Assert.That(lhs.Rpar, Is.EqualTo(rhs.Rpar));
             Assert.That(lhs.AirO2, Is.EqualTo(rhs.AirO2));
-            Assert.That(lhs.Windspeed, Is.EqualTo(rhs.Windspeed));
             // Canopy params
             AssertCanopyValuesEqual(lhs.Canopy, rhs.Canopy);
             // Pathway params
@@ -71,7 +70,7 @@ namespace UnitTests.DCaPST
         /// <param name="rhs"></param>
         private static void AssertPathwayValuesEqual(PathwayParameters lhs, PathwayParameters rhs)
         {            
-            Assert.That(lhs.IntercellularToAirCO2Ratio, Is.EqualTo(rhs.IntercellularToAirCO2Ratio));
+            Assert.That(lhs.IntercellularToBoundaryLayerCO2Ratio, Is.EqualTo(rhs.IntercellularToBoundaryLayerCO2Ratio));
             Assert.That(lhs.FractionOfCyclicElectronFlow, Is.EqualTo(rhs.FractionOfCyclicElectronFlow));
             Assert.That(lhs.RespirationSLNRatio, Is.EqualTo(rhs.RespirationSLNRatio));
             Assert.That(lhs.MaxRubiscoActivitySLNRatio, Is.EqualTo(rhs.MaxRubiscoActivitySLNRatio));

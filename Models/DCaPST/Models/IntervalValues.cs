@@ -36,5 +36,8 @@ namespace Models.DCAPST
         /// Area values for the shaded canopy
         /// </summary>
         public AreaValues Shaded { get; set; }
+
+        /// <summary>Internal results for each physical canopy layer.</summary>
+        public CanopyLayerValues[] Layers { get; set; }
     }
 }

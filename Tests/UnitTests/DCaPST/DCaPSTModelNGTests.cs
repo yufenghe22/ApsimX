@@ -1,6 +1,10 @@
 ﻿using APSIM.Core;
 using GLib;
 using Models.DCAPST;
+using Models.LeafWise;
+using Models.Interfaces;
+using Models.PMF;
+using Models.PMF.Struct;
 using Moq;
 using NUnit.Framework;
 
@@ -72,6 +76,52 @@ namespace UnitTests.DCaPST
             mock.Verify(cropGen => cropGen.Generate(cropName), Times.Once());
             mock.Verify(cropGen => cropGen.Generate(differentCropName), Times.Once());
             Assert.That(model.CropName, Is.EqualTo(differentCropName));
+        }
+
+        [Test]
+        public void EffectiveLeafWidthUsesLeafWiseForMatchingCrop()
+        {
+            var plant = new Plant { Name = "Sorghum" };
+            var leafWise = new LeafWiseModel { CropName = plant.Name };
+            var culm = new Culm(0) { CulmNo = 0, FinalLeafNo = 17 };
+            leafWise.CalculateIndividualLeafArea(1, culm);
+            leafWise.CalculateIndividualLeafArea(2, culm);
+            leafWise.UpdateEffectiveLeafWidth(2.0);
+
+            double result = DCaPSTModelNG.GetEffectiveLeafWidth(0.09, leafWise, plant);
+
+            Assert.That(result, Is.EqualTo(leafWise.EffectiveLeafWidth));
+        }
+
+        [Test]
+        public void EffectiveLeafWidthKeepsConfiguredWidthWithoutMatchingLeafWiseOutput()
+        {
+            var plant = new Plant { Name = "Sorghum" };
+            var leafWise = new LeafWiseModel { CropName = "Maize" };
+
+            double result = DCaPSTModelNG.GetEffectiveLeafWidth(0.09, leafWise, plant);
+
+            Assert.That(result, Is.EqualTo(0.09));
+        }
+
+        [Test]
+        public void CanopyLayerModelDefaultsToSingleLayer()
+        {
+            var model = new DCaPSTModelNG();
+
+            Assert.That(model.CanopyLayerModel, Is.EqualTo("Single-layer model"));
+            Assert.That(model.NumberOfCanopyLayers, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void MultiLayerModelUsesThreeLayers()
+        {
+            var model = new DCaPSTModelNG
+            {
+                CanopyLayerModel = "Multi-layer model"
+            };
+
+            Assert.That(model.NumberOfCanopyLayers, Is.EqualTo(3));
         }
 
         #endregion

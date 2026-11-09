@@ -16,9 +16,16 @@
         /// Updates the intercellular CO2 for a pathway
         /// </summary>
         /// <param name="pathway">The pathway to update</param>
-        /// <param name="gt">Water conductance</param>
-        /// <param name="waterUseMolsSecond">Water usage rate</param>
-        void UpdateIntercellularCO2(AssimilationPathway pathway, double gt, double waterUseMolsSecond);
+        /// <param name="gt">Total CO2 conductance</param>
+        void UpdateIntercellularCO2(AssimilationPathway pathway, double gt) =>
+            UpdateIntercellularCO2(pathway, gt, 0.0);
+
+        /// <summary>
+        /// Updates intercellular CO2 while retaining the former water-use argument
+        /// for API compatibility. The water-use value no longer alters CO2 diffusion.
+        /// </summary>
+        void UpdateIntercellularCO2(AssimilationPathway pathway, double gt,
+                                    double waterUseMolsSecond);
 
         /// <summary>
         /// Updates the partial pressures for a pathway
